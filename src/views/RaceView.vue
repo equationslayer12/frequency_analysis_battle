@@ -1,23 +1,7 @@
 <template>
     <h1 class="text-4xl font-semibold my-14 hover:scale-125 duration-150 text-accent-color">FREQUENCY ANALYSIS BATTLE</h1>
     <div id="textbox" class="flex-wrap bg-secondary-color text-ignore-color flex justify-between gap-x-2 text-xl font-mono h-96 aspect-video p-8 rounded-xl shadow-lg shadow-slate-900 py-0">
-        <div class="w-full flex justify-center items-center text-xs underline">
-            <p>SHOW</p>
-            <label class="switch scale-75" id="hiddenSwitch">
-                <input type="checkbox">
-                <span class="slider round">
-
-                </span>
-            </label>
-            <p>HIDE</p>
-        </div>
-        <!-- <span v-for="word in text.split(' ')">
-            <span v-for="letter in word" v-if="letter !== ' '" :original-letter="letter" @mouseover="hoverLetter" @mouseleave="selectedLetter = ''" class="duration-300" :class="{'guessed': letters[letter].isGuessed, 'selected': letter == selectedLetter}">
-                <span v-if="letter == letters[letter].display && isHidden">*</span>
-                <span v-else-if="letter in letters">{{ letters[letter].display }}</span>
-                <span v-else>{{ letter }}</span>
-            </span>
-        </span> -->
+        <Switch @toggle="isHidden = !isHidden" />
         <span v-for="word in text.split(' ')">
             <span v-for="letter in word" v-if="letter !== ' '" :original-letter="letter" @mouseover="hoverLetter" @mouseleave="selectedLetter = ''" class="duration-300">
                 <span v-if="!isLetter(letter)">{{ letter }}</span>
@@ -25,20 +9,13 @@
                 <span v-else-if="letter in letters" :class="{'guessed': letters[letter].isGuessed, 'selected': letter == selectedLetter}">{{ letters[letter].display }}</span>
                 <span v-else>{{ letter }}</span>
             </span>
-
         </span>
-            <!-- <span v-for="letter in word" v-if="letter !== ' '" :original-letter="letter" @mouseover="hoverLetter" @mouseleave="selectedLetter = ''" class="duration-300" :class="{'guessed': letters[letter].isGuessed, 'selected': letter == selectedLetter}">
-                <span v-if="letter == letters[letter].display && isHidden">*</span>
-                <span v-else-if="letter in letters">{{ letters[letter].display }}</span>
-                <span v-else>{{ letter }}</span>
-            </span> -->
-
-        <!-- onmouseover="selected" onmouseleave="endHoverLetter" -->
     </div>
 </template>
 
 <script setup>
     import {ref, reactive} from 'vue'
+    import Switch from '../components/Switch.vue'
     var letter = '';
     const text = "DJ DK C QLXDWI WF SDGDU PCX. XLRLU KQCSLKBDQK, KJXDHDET FXWZ C BDIILE RCKL, BCGL PWE JBLDX FDXKJ GDSJWXO CTCDEKJ JBL LGDU TCUCSJDS LZQDXL. IYXDET JBL RCJJUL, XLRLU KQDLK ZCECTLI JW KJLCU KLSXLJ QUCEK JW JBL LZQDXL’K YUJDZCJL PLCQWE, JBL ILCJB KJCX, CE CXZWXLI KQCSL KJCJDWE PDJB LEWYTB QWPLX JW ILKJXWO CE LEJDXL QUCELJ. QYXKYLI RO JBL LZQDXL’K KDEDKJLX CTLEJK, QXDESLKK ULDC XCSLK BWZL CRWCXI BLX KJCXKBDQ, SYKJWIDCE WF JBL KJWULE QUCEK JBCJ SCE KCGL BLX QLWQUL CEI XLKJWXL FXLLIWZ JW JBL TCUCVO…";
     const letters = ref(
@@ -47,7 +24,7 @@
         }
     );
     var selectedLetter = ref('');
-    var isHidden = true;
+    var isHidden = ref(false);
 
     document.addEventListener('keyup', keypress);
 
