@@ -31,7 +31,33 @@
                     class="flex flex-col justify-center items-center"
                 >
                     {{ wordsCount[word] }}
-                    <div class="bg-accent-color w-8 border-solid border-secondary-color border-1" :style="{'height': `${wordsCount[word] / maxWordCountForPage * 6}em`}"></div>
+                    <div class="bg-accent-color w-14 border-solid border-secondary-color border-1" :style="{'height': `${wordsCount[word] / maxWordCountForPage * 6}em`}"></div>
+                    <span>
+                        <span v-for="letter in word">
+                            <LetterComponent class="" @changeSelectedLetter="forwardChangeSelectedLetter" :letter="letter" :selectedLetter="selectedLetter" :letters="letters" :isHidden="isHidden"/>
+                        </span>
+                    </span>
+                </span>
+            </div>
+        </section>
+
+        <!-- Ngramas utility -->
+        <section v-if="selectedTool == tools[2]">
+            <nav class="flex justify-center items-center m-1 mb-0 space-x-1">
+                <button title="Go back" class="p-2 bg-secondary-color text-accent-color hover:bg-accent-color hover:text-primary-color duration-300 rounded-md" @click="updateNgramsPage(-1)">&#60;</button>
+                <span class="text-accent-color">{{ currentNgramsPage + 1 }} / {{ maxNgramsPage }}</span>
+                <button title="Go forward" class="p-2 bg-secondary-color text-accent-color hover:bg-accent-color hover:text-primary-color duration-300 rounded-md" @click="updateNgramsPage(1)">&#62;</button>
+
+                <div id="table"></div>
+            </nav>
+
+            <div id="table" class="text-third-color p-2 pt-0 flex justify-between items-end">
+                <span v-for="nGram in mostFrequentNgrams"
+                    class="flex flex-col justify-center items-center"
+                >
+                    {{ NgramsCount[nGram] }}
+                    <!-- <div class="bg-accent-color w-8 border-solid border-secondary-color border-1" :style="{'height': `${NgramsCount[word] / maxNgramCountForPage * 6}em`}"></div> -->
+                    <div class="bg-accent-color w-8 border-solid border-secondary-color border-1" :style="{'height': `6em`}"></div>
                     <span>
                         <span v-for="letter in word">
                             <LetterComponent class="" @changeSelectedLetter="forwardChangeSelectedLetter" :letter="letter" :selectedLetter="selectedLetter" :letters="letters" :isHidden="isHidden"/>
@@ -53,13 +79,17 @@ const emit = defineEmits(['changeSelectedLetter'])
 const text = removePunc(props.text);
 
 const tools = ref(["Letters", "Words", "N-Grams"]);
-var selectedTool = ref(tools.value[1]);
+var selectedTool = ref(tools.value[0]);
 
 const toolDescription = ref({
-    "N-Grams": "A sequence of n adjacent symbols"
+    tools.value[0]: "Letter frequency",
+    tools.value[1]: "Word frequency",    
+    tools.value[2]: "A sequence of n adjacent symbols"
 });
 
 const abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+const wordsArray = text.split(" ");
 
 // Letters utility
 var lettersCount = ref({})
@@ -74,7 +104,6 @@ var currentWordPage = ref(0);
 const wordsPerPage = 6;
 
 var wordsCount = ref({})
-const wordsArray = text.split(" ");
 
 for (let i = 0; i < wordsArray.length; i++) {
     const word = wordsArray[i];
@@ -98,6 +127,43 @@ function updateWordsPage(count) {
         currentWordPage.value %= maxWordPage;
     }
     maxWordCountForPage = findMaxWordCountForPage();
+}
+
+// Ngrams utility
+const Nsize = 3
+const maxLettersPerPage = 100;
+var currentNgramsPage = ref(0);
+const ngramsPerPage = maxLettersPerPage / Nsize;
+const maxNgramsPage = 3;
+
+
+var NgramsCount = ref({});
+
+for (let i = 0; i < wordsArray.length; i++) {
+    const word = wordsArray[i];
+    for (let j = 0; j < word.length - Nsize + 1; j++) {
+        const nGram = word.slice(j, j + Nsize);
+        if (NgramsCount.value[nGram])
+            NgramsCount.value[nGram] ++;
+        else
+            NgramsCount.value[nGram] = 1;
+        
+    }
+}
+
+const mostFrequentNgrams = Object.keys(NgramsCount.value);
+mostFrequentWords.sort((a, b) => NgramsCount.value[b] - NgramsCount.value[a]);
+
+
+function updateNgramsPage(count) {
+    currentNgramsPage.value += count;
+    if (currentNgramsPage.value < 0) {
+        currentNgramsPage.value = maxNgramsPage - 1;
+    }
+    else if (maxNgramsPage <= currentNgramsPage.value) {
+        currentNgramsPage.value %= maxNgramsPage;
+    }
+    maxNgramsCountForPage = findNgramsWordCountForPage();
 }
 
 
