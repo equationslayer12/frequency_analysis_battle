@@ -1,26 +1,26 @@
 <template>
     <div id="analysis-tools" class="bg-primary-color min-h-56 w-full border-secondary-color flex flex-col justify-between border-solid border-4 rounded-md mt-3">
         <nav class="flex justify-around content-stretch border-b-4 border-secondary-color cursor-pointer">
-            <div v-for="toolName in tools" @click="selectedTool = toolName" class="bg-secondary-color text-accent-color flex-grow hover:bg-accent-color hover:text-primary-color duration-300"
+            <div v-for="toolName in toolNames" @click="selectedTool = toolName" class="bg-secondary-color text-accent-color flex-grow hover:bg-accent-color hover:text-primary-color duration-300"
             :class="{'selected': toolName == selectedTool}"
-            :title="toolDescription[toolName]"
+            :title="toolDescriptions[toolName]"
             >{{ toolName }}</div>
         </nav>
 
         <!-- Letters utility -->
-        <section v-if="selectedTool == tools[0]">
+        <section v-if="selectedTool == toolNames[LETTERS_TOOL]">
             <div id="table" class="text-third-color p-2 flex justify-between items-end">
                 <span v-for="[letter, count] in Object.entries(lettersCount)">
                     <p>{{ count }}</p>
                     <div class="bg-accent-color w-4 border-solid border-secondary-color border-1" :style="{'height': `${count / maxLetterCount * 6}em`}"></div>
                     <p>{{ letter }}</p>
-                    <LetterComponent class="border-b-2 border-secondary-color" @changeSelectedLetter="forwardChangeSelectedLetter" :letter="letter" :selectedLetter="selectedLetter" :letters="letters" :isHidden="isHidden"/>
+                    <LetterComponent class="border-b-2 border-secondary-color" :letter="letter"/>
                 </span>
             </div>
         </section>
 
         <!-- Words utility -->
-        <section v-if="selectedTool == tools[1]">
+        <section v-if="selectedTool == toolNames[WORDS_TOOL]">
             <nav class="flex justify-center items-center m-1 mb-0 space-x-1">
                 <button title="Go back" class="p-2 bg-secondary-color text-accent-color hover:bg-accent-color hover:text-primary-color duration-300 rounded-md" @click="updateWordsPage(-1)">&#60;</button>
                 <span class="text-accent-color">{{ currentWordPage + 1 }} / {{ maxWordPage }}</span>
@@ -34,33 +34,35 @@
                     <div class="bg-accent-color w-14 border-solid border-secondary-color border-1" :style="{'height': `${wordsCount[word] / maxWordCountForPage * 6}em`}"></div>
                     <span>
                         <span v-for="letter in word">
-                            <LetterComponent class="" @changeSelectedLetter="forwardChangeSelectedLetter" :letter="letter" :selectedLetter="selectedLetter" :letters="letters" :isHidden="isHidden"/>
+                            <LetterComponent :letter="letter"/>
                         </span>
                     </span>
                 </span>
             </div>
         </section>
 
-        <!-- Ngramas utility -->
-        <section v-if="selectedTool == tools[2]">
+        <!-- Ngrams utility -->
+        <!-- <section v-if="selectedTool == toolNames[NGRAMS_TOOL]">
+            {{ ngramAnalysis.Nsize }}
+        </section> -->
+        <section v-if="selectedTool == toolNames[NGRAMS_TOOL]">
             <nav class="flex justify-center items-center m-1 mb-0 space-x-1">
-                <button title="Go back" class="p-2 bg-secondary-color text-accent-color hover:bg-accent-color hover:text-primary-color duration-300 rounded-md" @click="updateNgramsPage(-1)">&#60;</button>
-                <span class="text-accent-color">{{ currentNgramsPage + 1 }} / {{ maxNgramsPage }}</span>
-                <button title="Go forward" class="p-2 bg-secondary-color text-accent-color hover:bg-accent-color hover:text-primary-color duration-300 rounded-md" @click="updateNgramsPage(1)">&#62;</button>
+                <button title="Go back" class="p-2 bg-secondary-color text-accent-color hover:bg-accent-color hover:text-primary-color duration-300 rounded-md" @click="ngramAnalysis.changeNgramPage(-1)">&#60;</button>
+                <span class="text-accent-color">{{ ngramAnalysis.currentPage.value + 1 }} / {{ ngramAnalysis.maxPage.value }}</span>
+                <button title="Go forward" class="p-2 bg-secondary-color text-accent-color hover:bg-accent-color hover:text-primary-color duration-300 rounded-md" @click="ngramAnalysis.changeNgramPage(1)">&#62;</button>
 
                 <div id="table"></div>
             </nav>
 
             <div id="table" class="text-third-color p-2 pt-0 flex justify-between items-end">
-                <span v-for="nGram in mostFrequentNgrams"
+                <span v-for="nGram in ngramAnalysis.mostFrequentNgrams.slice(ngramAnalysis.currentPage.value * ngramAnalysis.nGramsPerPage.value, ngramAnalysis.currentPage.value * ngramAnalysis.nGramsPerPage.value + ngramAnalysis.nGramsPerPage.value)"
                     class="flex flex-col justify-center items-center"
                 >
-                    {{ NgramsCount[nGram] }}
-                    <!-- <div class="bg-accent-color w-8 border-solid border-secondary-color border-1" :style="{'height': `${NgramsCount[word] / maxNgramCountForPage * 6}em`}"></div> -->
-                    <div class="bg-accent-color w-8 border-solid border-secondary-color border-1" :style="{'height': `6em`}"></div>
+                    {{ ngramAnalysis.NgramsCount.value[nGram] }}
+                    <div class="bg-accent-color w-8 border-solid border-secondary-color border-1" :style="{'height': `${ngramAnalysis.NgramsCount.value[nGram] / ngramAnalysis.maxNgramPerCurrentPage.value * 6}em`}"></div>
                     <span>
-                        <span v-for="letter in word">
-                            <LetterComponent class="" @changeSelectedLetter="forwardChangeSelectedLetter" :letter="letter" :selectedLetter="selectedLetter" :letters="letters" :isHidden="isHidden"/>
+                        <span v-for="letter in nGram">
+                            <LetterComponent :letter="letter"/>
                         </span>
                     </span>
                 </span>
@@ -72,24 +74,27 @@
 
 <script setup>
 import LetterComponent from '../components/LetterComponent.vue'
+import nGramAnalysis from '../tools/nGramAnalysis'
+import textUtil from '../tools/TextUtil'
 import { ref } from 'vue'
 
-const props = defineProps(['text', 'letters', 'isHidden', 'selectedLetter'])
-const emit = defineEmits(['changeSelectedLetter'])
-const text = removePunc(props.text);
+// const props = defineProps(['text', 'letters', 'isHidden', 'selectedLetter'])
+// const emit = defineEmits(['changeSelectedLetter'])
+const text = removePunc(textUtil.text);
 
-const tools = ref(["Letters", "Words", "N-Grams"]);
-var selectedTool = ref(tools.value[0]);
+const LETTERS_TOOL = 0;
+const WORDS_TOOL = 1;
+const NGRAMS_TOOL = 2;
 
-const toolDescription = ref({
-    tools.value[0]: "Letter frequency",
-    tools.value[1]: "Word frequency",    
-    tools.value[2]: "A sequence of n adjacent symbols"
-});
+const toolDescriptions = {
+    "Letters": "Letter frequency",
+    "Words": "Word frequency",    
+    "N-Grams": "A sequence of n adjacent symbols"
+};
+const toolNames = ref(Object.keys(toolDescriptions));
+var selectedTool = ref(toolNames.value[NGRAMS_TOOL]);
 
 const abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-const wordsArray = text.split(" ");
 
 // Letters utility
 var lettersCount = ref({})
@@ -97,7 +102,7 @@ for (let i = 0; i < abc.length; i++) {
     const letter = abc[i];
     lettersCount.value[letter] = 0;
 }
-countLetters(text);
+countLetters(textUtil.text);
 
 // Words utility
 var currentWordPage = ref(0);
@@ -105,8 +110,8 @@ const wordsPerPage = 6;
 
 var wordsCount = ref({})
 
-for (let i = 0; i < wordsArray.length; i++) {
-    const word = wordsArray[i];
+for (let i = 0; i < textUtil.wordsArray.length; i++) {
+    const word = textUtil.wordsArray[i];
     if (wordsCount.value[word])
         wordsCount.value[word] ++;
     else
@@ -130,42 +135,7 @@ function updateWordsPage(count) {
 }
 
 // Ngrams utility
-const Nsize = 3
-const maxLettersPerPage = 100;
-var currentNgramsPage = ref(0);
-const ngramsPerPage = maxLettersPerPage / Nsize;
-const maxNgramsPage = 3;
-
-
-var NgramsCount = ref({});
-
-for (let i = 0; i < wordsArray.length; i++) {
-    const word = wordsArray[i];
-    for (let j = 0; j < word.length - Nsize + 1; j++) {
-        const nGram = word.slice(j, j + Nsize);
-        if (NgramsCount.value[nGram])
-            NgramsCount.value[nGram] ++;
-        else
-            NgramsCount.value[nGram] = 1;
-        
-    }
-}
-
-const mostFrequentNgrams = Object.keys(NgramsCount.value);
-mostFrequentWords.sort((a, b) => NgramsCount.value[b] - NgramsCount.value[a]);
-
-
-function updateNgramsPage(count) {
-    currentNgramsPage.value += count;
-    if (currentNgramsPage.value < 0) {
-        currentNgramsPage.value = maxNgramsPage - 1;
-    }
-    else if (maxNgramsPage <= currentNgramsPage.value) {
-        currentNgramsPage.value %= maxNgramsPage;
-    }
-    maxNgramsCountForPage = findNgramsWordCountForPage();
-}
-
+const ngramAnalysis = new nGramAnalysis(3);
 
 function countLetters(text) {
     for (let i = 0; i < text.length; i++) {
@@ -188,8 +158,8 @@ function removePunc(str) {
 
 var maxLetterCount = 0;
 
-for (let i = 0; i < text.length; i++) {
-    const letter = text[i];
+for (let i = 0; i < textUtil.text.length; i++) {
+    const letter = textUtil.text[i];
     if(isLetter(letter)) {
         maxLetterCount = Math.max(lettersCount.value[letter], maxLetterCount);
     }
