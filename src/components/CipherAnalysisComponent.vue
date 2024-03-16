@@ -1,5 +1,4 @@
 <template>
-    <h1 class="text-4xl font-semibold my-14 hover:scale-125 duration-150 text-accent-color">Span Racer</h1>
     <main class="flex flex-col items-center">
     <div id="textbox" class="border-accent-color border-2 border-opacity-20 rounded-xl border- bg-secondary-color text-ignore-color flex flex-wrap justify-between gap-x-2 text-xl font-mono h-96 aspect-video p-8 shadow-lg shadow-slate-900 py-0">
         <Switch @toggle="textUtil.hiddenModeActive.value = !textUtil.hiddenModeActive.value" />
@@ -30,7 +29,7 @@
 
     const props = defineProps({
         text: String
-    })
+    });
     var letter = '';
     if (props.text)
         textUtil.setText(props.text);

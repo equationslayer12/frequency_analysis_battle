@@ -92,7 +92,7 @@ const toolDescriptions = {
     "N-Grams": "A sequence of n adjacent symbols"
 };
 const toolNames = ref(Object.keys(toolDescriptions));
-var selectedTool = ref(toolNames.value[NGRAMS_TOOL]);
+var selectedTool = ref(toolNames.value[LETTERS_TOOL]);
 
 const abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 

@@ -2,7 +2,6 @@
   <div id="top" @mousemove="setTopSpotlightPosition" class="relative bg-secondary-color h-96 w-full flex flex-col justify-center items-center overflow-hidden rounded-b-full shadow-lg shadow-black border-solid">
     <h1 id="title" class="text-white text-8xl">SPAN RACER</h1>
   </div>
-  <PinkButton draggable="false" href="/race">Race</PinkButton>
   <PinkButton draggable="false" href="/practice">Practice</PinkButton>
   <button @click="test" class="bg-cyan-500 font-bold text-3xl rounded-md p-10">TEST: {{ counter }}</button>
 </template>
