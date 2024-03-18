@@ -17,17 +17,22 @@ export default class nGramAnalysis {
     maxPage: Ref
     currentPage: Ref
     NgramsCount: Ref
-    mostFrequentNgrams: string[]
+    mostFrequentNgrams: Ref
 
-    constructor(Nsize: number, wordArray: string[]) {
+    constructor(Nsize: number) {
         this.Nsize = ref(Nsize);
         this.maxLettersPerPage = ref(40);
-        this.nGramsPerPage = ref(Math.floor(this.maxLettersPerPage.value / Nsize));
+        this.nGramsPerPage = ref(
+            Math.min(
+                Math.floor(this.maxLettersPerPage.value / Nsize),
+                12
+            )
+        );
         this.currentPage = ref(0);
         this.maxNgramPerCurrentPage = ref(1);
 
         this.NgramsCount = ref({});
-        this.mostFrequentNgrams = [];
+        this.mostFrequentNgrams = ref([]);
         this._countNgrams();
         this._updateMaxNgramPerCurrentPage()
         
@@ -40,6 +45,10 @@ export default class nGramAnalysis {
      * count the N-Grams in the words array, and update NgramsCount and mostFrequentNgrams accordingly.
      */
     _countNgrams() {
+        for (var nGram in this.NgramsCount.value)
+            delete this.NgramsCount.value[nGram];
+
+        this.NgramsCount.value = {};
         for (let i = 0; i < textUtil.wordsArray.length; i++) {
             const word = textUtil.wordsArray[i];
             for (let j = 0; j < word.length - this.Nsize.value + 1; j++) {
@@ -51,13 +60,22 @@ export default class nGramAnalysis {
                 
             }
         }
-
-        this.mostFrequentNgrams = Object.keys(this.NgramsCount.value);
-        this.mostFrequentNgrams.sort((a, b) => this.NgramsCount.value[b] - this.NgramsCount.value[a]);    
+        
+        var mostFrequentNgrams = Object.keys(this.NgramsCount.value)
+        mostFrequentNgrams.sort((a, b) => this.NgramsCount.value[b] - this.NgramsCount.value[a]);
+        this.mostFrequentNgrams.value = mostFrequentNgrams;
     }
 
-    setNsize(Nsize: number) {
-        this.Nsize.value = Nsize;
+    changeNSize(value: number) {
+        this.Nsize.value += value;
+        this.nGramsPerPage.value = Math.min(
+            Math.floor(this.maxLettersPerPage.value / this.Nsize.value),
+            12
+        );
+
+        this.currentPage.value = 0;
+        this._countNgrams()
+        this._updateMaxNgramPerCurrentPage()
     }
 
     changeNgramPage(count: number) {
@@ -75,9 +93,9 @@ export default class nGramAnalysis {
     _updateMaxNgramPerCurrentPage() {
         this.maxNgramPerCurrentPage.value = 0;
         const pageStartIndex = this.currentPage.value * this.nGramsPerPage.value
-        const pageEndIndex = Math.min(this.mostFrequentNgrams.length, pageStartIndex + this.nGramsPerPage.value);
+        const pageEndIndex = Math.min(this.mostFrequentNgrams.value.length, pageStartIndex + this.nGramsPerPage.value);
         for (let i = pageStartIndex; i < pageEndIndex; i++) {
-            const nGram = this.mostFrequentNgrams[i];
+            const nGram = this.mostFrequentNgrams.value[i];
             this.maxNgramPerCurrentPage.value = Math.max(this.NgramsCount.value[nGram], this.maxNgramPerCurrentPage.value);
         }
     }

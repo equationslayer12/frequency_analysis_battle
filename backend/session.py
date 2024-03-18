@@ -20,7 +20,7 @@ class Session:
         try:
             session = json.loads(base64.b64decode(session_cookie))
             return cls.from_json(session)
-        except (binascii.Error, UnicodeDecodeError):
+        except (binascii.Error, UnicodeDecodeError, json.decoder.JSONDecodeError):
             return False
 
     @classmethod

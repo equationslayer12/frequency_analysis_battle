@@ -47,15 +47,19 @@
         </section> -->
         <section v-if="selectedTool == toolNames[NGRAMS_TOOL]">
             <nav class="flex justify-center items-center m-1 mb-0 space-x-1">
-                <button title="Go back" class="p-2 bg-secondary-color text-accent-color hover:bg-accent-color hover:text-primary-color duration-300 rounded-md" @click="ngramAnalysis.changeNgramPage(-1)">&#60;</button>
-                <span class="text-accent-color">{{ ngramAnalysis.currentPage.value + 1 }} / {{ ngramAnalysis.maxPage.value }}</span>
-                <button title="Go forward" class="p-2 bg-secondary-color text-accent-color hover:bg-accent-color hover:text-primary-color duration-300 rounded-md" @click="ngramAnalysis.changeNgramPage(1)">&#62;</button>
-
+                <button title="Decrease N size" class="p-2 bg-secondary-color text-accent-color hover:bg-accent-color hover:text-primary-color duration-300 rounded-md" @click="ngramAnalysis.changeNSize(-1)">&#60;</button>
+                <div class="inline-flex flex-col">
+                    <span class="text-accent-color font-bold">{{ ngramAnalysis.Nsize }}</span>
+                    <p class="text-accent-color">N Size</p>
+                </div>
+                <button title="Increase N Size" class="p-2 bg-secondary-color text-accent-color hover:bg-accent-color hover:text-primary-color duration-300 rounded-md" @click="ngramAnalysis.changeNSize(1)">&#62;</button>
+                
                 <div id="table"></div>
             </nav>
-
+            
+            
             <div id="table" class="text-third-color p-2 pt-0 flex justify-between items-end">
-                <span v-for="nGram in ngramAnalysis.mostFrequentNgrams.slice(ngramAnalysis.currentPage.value * ngramAnalysis.nGramsPerPage.value, ngramAnalysis.currentPage.value * ngramAnalysis.nGramsPerPage.value + ngramAnalysis.nGramsPerPage.value)"
+                <span v-for="nGram in ngramAnalysis.mostFrequentNgrams.value.slice(ngramAnalysis.currentPage.value * ngramAnalysis.nGramsPerPage.value, ngramAnalysis.currentPage.value * ngramAnalysis.nGramsPerPage.value + ngramAnalysis.nGramsPerPage.value)"
                     class="flex flex-col justify-center items-center"
                 >
                     {{ ngramAnalysis.NgramsCount.value[nGram] }}

@@ -5,12 +5,14 @@ from typing import Dict
 from race_game import RaceGame
 from client import Client
 from session import Session
+from protocol import Protocol
 
 app = FastAPI()
 clients: dict = {}
 # CORS(app, resources={r"*": {"origins": "*"}})
 
 a = 0
+
 
 @app.get('/')
 def root():
@@ -33,6 +35,27 @@ async def practice_socket(websocket: WebSocket):
     await websocket.accept()
     client = handle_socket_session(websocket)
     client.socket = websocket
+    while client.socket:
+        request = await client.socket.receive_text()
+        response = craft_response(client, request)
+        if response:
+            await client.socket.send(response)
+
+
+def craft_response(client: Client, request: str) -> str:
+    fields = Protocol.Decrypt.seperate_to_fields(request)
+    if not fields:
+        return Protocol.Error.empty_request
+
+    command, *args = fields
+    if command == Protocol.Command.change_letter:
+        if len(args) != 2:
+            return Protocol.Error.invalid_request
+
+        from_letter, to_letter = args
+        print(f"from {from_letter}, to {to_letter}")
+        # client.race_game.dictionary[from_letter] = to_letter
+        # print(client.race_game.dictionary)
 
 
 def handle_socket_session(websocket) -> Client:

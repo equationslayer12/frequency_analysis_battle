@@ -30,6 +30,8 @@
     const props = defineProps({
         text: String
     });
+
+    const emit = defineEmits(["letterChange"]);
     var letter = '';
     if (props.text)
         textUtil.setText(props.text);
@@ -58,13 +60,18 @@
                 letterBank.value[letterObject.display].count--;
             letterObject.display = letter;
             letterObject.isGuessed = true;
+
+            let originLetter = textUtil.selectedLetter.value
+            emit("letterChange", originLetter, letter)
         }
         else if (letter == 'BACKSPACE') {
-            var letterObject = textUtil.lettersState.value[textUtil.selectedLetter.value]
+            let originLetter = textUtil.selectedLetter.value
+            var letterObject = textUtil.lettersState.value[originLetter]
             if (letterObject.isGuessed)
                 letterBank.value[letterObject.display].count--;
-            letterObject.display = textUtil.selectedLetter.value;
+            letterObject.display = originLetter;
             letterObject.isGuessed = false;
+            emit("letterChange", originLetter, originLetter)
         }
         else if (letter == 'ESCAPE')
             textUtil.selectedLetter.value = '';
