@@ -1,5 +1,5 @@
 <template>
-    <h1 class="text-4xl font-semibold my-14 hover:scale-125 duration-150 text-accent-color">Span Racer</h1>
+    <h1 class="text-4xl font-semibold my-14 hover:scale-125 duration-150 text-text-color">Span Racer</h1>
     <span v-if="text">
         <CipherAnalysisComponent :text="text" @letterChange="sendChangedLetter"/>
     </span>
