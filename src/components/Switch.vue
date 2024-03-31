@@ -34,7 +34,7 @@
 
 /* The slider */
 .slider {
-  @apply bg-primary-color;
+  @apply bg-background-color;
   position: absolute;
   cursor: pointer;
   top: 0;
@@ -46,7 +46,7 @@
 }
 
 .slider:before {
-  @apply bg-accent-color;
+  @apply bg-text-color;
   position: absolute;
   content: "";
   height: 26px;

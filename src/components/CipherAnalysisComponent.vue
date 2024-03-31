@@ -1,6 +1,6 @@
 <template>
     <main class="flex flex-col items-center">
-    <div id="textbox" class="border-accent-color border-2 border-opacity-20 rounded-xl border- bg-secondary-color text-ignore-color flex flex-wrap justify-between gap-x-2 text-xl font-mono h-96 aspect-video p-8 shadow-lg shadow-slate-900 py-0">
+    <div id="textbox" class="border-text-color border-2 border-opacity-20 rounded-xl border- bg-primary-color text-ignore-color flex flex-wrap justify-between gap-x-2 text-xl font-mono h-96 aspect-video p-8 shadow-lg shadow-slate-900 py-0">
         <Switch @toggle="textUtil.hiddenModeActive.value = !textUtil.hiddenModeActive.value" />
         <span v-for="word in textUtil.text.split(' ')">
             <span v-for="letter in word">
@@ -10,7 +10,7 @@
     </div>
 
     <div id="letter-bank" class="flex w-full justify-around">
-        <span v-for="letter in textUtil.alphabet" class="text-accent-color font-bold" :class="{'letter-bank--guessed': letterBank[letter].count > 0}">
+        <span v-for="letter in textUtil.alphabet" class="text-text-color font-bold" :class="{'letter-bank--guessed': letterBank[letter].count > 0}">
             {{ letter }}
         </span>
     </div>
@@ -93,7 +93,7 @@
     }
 
     .selected {
-        @apply bg-pink-500 text-primary-color rounded-sm font-normal;
+        @apply bg-accent-color text-background-color rounded-sm font-normal;
     }
 
 </style>

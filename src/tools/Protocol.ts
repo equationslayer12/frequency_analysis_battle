@@ -3,6 +3,6 @@ export default class Protocol {
         static changeLetter(originLetter: string, gussedLetter: string) {
             return `CL;${originLetter};${gussedLetter}`
     }
-
+ 
     }
 }

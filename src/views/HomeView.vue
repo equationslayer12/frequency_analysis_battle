@@ -1,16 +1,21 @@
 <template>
-  <div id="top" @mousemove="setTopSpotlightPosition" class="relative bg-secondary-color h-96 w-full flex flex-col justify-center items-center overflow-hidden rounded-b-full shadow-lg shadow-black border-solid">
+  <div id="top" @mousemove="setTopSpotlightPosition" class="relative bg-primary-color h-96 w-full flex flex-col justify-center items-center overflow-hidden rounded-b-full shadow-lg shadow-black border-solid">
     <h1 id="title" class="text-white text-8xl">SPAN RACER</h1>
   </div>
   <PinkButton draggable="false" href="/practice">Practice</PinkButton>
+  <PinkButton draggable="false" @click="isSigningUp = true">Login</PinkButton>
+  <PinkButton draggable="false">Sign Up</PinkButton>
   <button @click="test" class="bg-cyan-500 font-bold text-3xl rounded-md p-10">TEST: {{ counter }}</button>
+  <SignUp v-if="isSigningUp" @leave="isSigningUp = false"/>
 </template>
 
 <script setup lang="ts">
 import {ref} from 'vue';
 import axios from 'axios';
 import PinkButton from '../components/pinkButton.vue'
+import SignUp from './SignUpView.vue'
 
+var isSigningUp = ref(false);
 var isHovered = ref(false);
 var counter = ref('Loading..');
 
@@ -90,7 +95,7 @@ function setTopSpotlightPosition(event: any) {
 }
     /* #app {
       @apply w-screen h-screen;
-      /* @apply flex justify-center items-center bg-primary-color; */
+      /* @apply flex justify-center items-center bg-background-color; */
     /* } */
 
 

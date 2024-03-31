@@ -6,17 +6,56 @@ from race_game import RaceGame
 from client import Client
 from session import Session
 from protocol import Protocol
+from database import Database
+from starlette.websockets import WebSocketDisconnect
+
 
 app = FastAPI()
 clients: dict = {}
+db = Database.get_instance("users.db")
 # CORS(app, resources={r"*": {"origins": "*"}})
 
 a = 0
+# DATABASE_LOCATION = '/db/users.db'
+# database = Database(DATABASE_LOCATION)
 
+@app.post('/api/log-in')
+async def log_in_with_email(request: Request):
+    info = await request.json()
 
-@app.get('/')
-def root():
-    return {"message": "hello guys welcome to my youtube channel"}
+    email = info.get('email')
+    password = info.get('password')
+
+    print(email, password)
+
+    if not (email and password):
+        return Protocol.Error.invalid_request
+
+    log_in_success = db.log_in(email, password)
+
+    return {
+        "success": log_in_success
+    }
+
+@app.post("/api/sign-up")
+async def sign_up(request: Request):
+    info = await request.json()
+
+    username = info.get('username')
+    country = info.get('country')
+    email = info.get('email')
+    password = info.get('password')
+
+    print(f"username: {username}, country: {country}, email: {email}, password: {password}")
+
+    if not (username and country and email and password):
+        return Protocol.Error.invalid_request
+
+    sign_up_success = db.sign_up(username, country, email, password)
+
+    return {
+        "success": sign_up_success
+    }
 
 
 @app.get("/api/practice")
@@ -31,6 +70,13 @@ def practice(request: Request, response: Response):
 
 
 @app.websocket("/api/practice")
+async def receive_practice_socket(websocket: WebSocket):
+    try:
+        await practice_socket(websocket)
+    except WebSocketDisconnect:
+        print("Client disconnected")
+
+
 async def practice_socket(websocket: WebSocket):
     await websocket.accept()
     client = handle_socket_session(websocket)
