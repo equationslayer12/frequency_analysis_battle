@@ -2,6 +2,7 @@
 node_modules
 /dist
 
+*.db
 
 # local env files
 .env.local
@@ -21,3 +22,6 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Compile and cache files
+/backend/__pycache__
