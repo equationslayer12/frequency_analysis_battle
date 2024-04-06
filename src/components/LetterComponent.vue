@@ -1,9 +1,16 @@
 <template>
 <span v-if="letter !== ' '" :original-letter="letter" @mouseover="hoverLetter" @mouseleave="textUtil.changeSelectedLetter('')">
-    <!-- {{ console.log((!textUtil.lettersState.value[letter].isGuessed) && textUtil.hiddenModeActive) }} -->
-    <span v-if="!textUtil.isLetter(letter)">{{ letter }}</span>
-    <span v-else-if="(!textUtil.lettersState.value[letter].isGuessed) && textUtil.hiddenModeActive.value" class="duration-300" :class="{'guessed': textUtil.lettersState.value[letter].isGuessed, 'selected': letter == textUtil.selectedLetter.value}">*</span>
-    <span v-else-if="letter in textUtil.lettersState.value" class="duration-300" :class="{'guessed': textUtil.lettersState.value[letter].isGuessed, 'selected': letter == textUtil.selectedLetter.value}">{{ textUtil.lettersState.value[letter].display }}</span>
+    <!-- letter isn't in alphabet -->
+    <span v-if="!textUtil.isLetter(letter)">{{ letter }} </span>  
+    
+    <!-- hidden mode is activated, display a * -->
+    <span v-else-if="(!lettersState[letter].isGuessed) && hiddenModeActive" class="duration-300" :class="{'guessed': lettersState[letter].isGuessed, 'selected': letter == textUtil.selectedLetter.value}">*</span>
+    <!--  -->
+    <span v-else-if="letter in lettersState" class="duration-300" :class="{
+        'guessed': lettersState[letter].isGuessed,
+        'selected': letter == selectedLetter,
+        'duplicate': isDuplicate(letter)
+    }">{{ lettersState[letter].display }}</span>
     <span v-else class="duration-300">{{ letter }}</span>
 </span>
 
@@ -11,15 +18,18 @@
 
 <script setup>
 import textUtil from '../tools/TextUtil'
+import { letterBank, lettersState, selectedLetter, hiddenModeActive } from '../tools/TextUtil';
 
-// const props = defineProps(['letter', 'selectedLetter', 'letters', 'isHidden'])
 const props = defineProps(['letter'])
-// const emit = defineEmits(['changeSelectedLetter'])
 
 function hoverLetter(event) {
     let letterElement = event.target.parentElement;
     textUtil.changeSelectedLetter(
         letterElement.getAttribute('original-letter')
     );
+}
+function isDuplicate(originalLetter) {
+    let displayLetter = lettersState.value[originalLetter].display
+    return letterBank.value[displayLetter].count > 1;
 }
 </script>
