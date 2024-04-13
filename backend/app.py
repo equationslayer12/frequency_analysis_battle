@@ -83,12 +83,13 @@ async def practice_socket(websocket: WebSocket):
     client.socket = websocket
     while client.socket:
         request = await client.socket.receive_text()
-        response = craft_response(client, request)
+        response = handle_request(client, request)
+        print("wow, response", response)
         if response:
-            await client.socket.send(response)
+            await client.socket.send_text(response)
 
 
-def craft_response(client: Client, request: str) -> str:
+def handle_request(client: Client, request: str) -> str:
     fields = Protocol.Decrypt.seperate_to_fields(request)
     if not fields:
         return Protocol.Error.empty_request
@@ -99,9 +100,13 @@ def craft_response(client: Client, request: str) -> str:
             return Protocol.Error.invalid_request
 
         from_letter, to_letter = args
-        print(f"from {from_letter}, to {to_letter}")
-        # client.race_game.dictionary[from_letter] = to_letter
-        # print(client.race_game.dictionary)
+        print("from", from_letter, "to", to_letter)
+        client.race_game.guess_letter(from_letter, to_letter)
+        response = Protocol.Encrypt.change_letter(
+            client.race_game.get_gussed_count()
+        )
+
+    return response
 
 
 def handle_socket_session(websocket) -> Client:

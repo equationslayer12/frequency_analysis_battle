@@ -21,6 +21,7 @@
 
 <script setup>
     import {ref, reactive} from 'vue'
+    import Protocol from '../tools/Protocol'
     import Switch from '../components/Switch.vue'
     import AnalysisTools from '../components/AnalysisTools.vue'
     import LetterComponent from '../components/LetterComponent.vue'
@@ -67,7 +68,7 @@
                 letterBank.value[letterObject.display].count--;
             letterObject.display = originLetter;
             letterObject.isGuessed = false;
-            emit("letterChange", originLetter, originLetter)
+            emit("letterChange", originLetter, Protocol.deleteChar);
         }
         else if (letter == 'ESCAPE')
             textUtil.selectedLetter.value = '';
@@ -96,4 +97,8 @@
         @apply bg-accent-color text-background-color rounded-sm font-normal;
     }
 
+    ::selection {
+        background: magenta;
+        color:black
+    }
 </style>

@@ -1,5 +1,22 @@
 class Protocol:
     success = True
+    DELETE_CHAR = "del"
+    class Encrypt:
+        @staticmethod
+        def combine(*args):
+            return ";".join(args)
+
+        @staticmethod
+        def change_letter(score: int) -> str:
+            """change letter response.
+
+            Args:
+                score (int): how many letters have the user guessed.
+
+            Returns:
+                _type_: str
+            """
+            return str(score)
 
     class Decrypt:
         @staticmethod
@@ -20,4 +37,7 @@ class Protocol:
         empty_request = "ERR.EMPTY"
         invalid_request = "ERR.INVALID"
         user_already_exists = "ERR.USER_ALREADY_EXISTS"
-    
+
+
+if __name__ == '__main__':
+    print(Protocol.Encrypt.combine('hi', 'arg2', 'arg3'))
