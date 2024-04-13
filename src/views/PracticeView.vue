@@ -50,7 +50,7 @@
 
         const message = Protocol.Encrypt.changeLetter(originLetter, gussedLetter);
         socket.onmessage = (event) => {
-                console.log(event.data)
+            lettersGuessed.value = event.data;
         }
         socket.send(message);
     }

@@ -7,7 +7,7 @@ import random
 SESSION_KEY_BYTE_LENGTH = 16
 
 
-class Session:
+class HTTPSession:
     def __init__(self, key: str, expire: Any) -> None:
         self.key = key
         self.expire = expire
@@ -16,7 +16,7 @@ class Session:
         return base64.b64encode(('{"key": "' + self.key + '"}').encode()).decode()
 
     @classmethod
-    def decrypt(cls, session_cookie: str) -> 'Session':
+    def decrypt(cls, session_cookie: str) -> 'HTTPSession':
         try:
             session = json.loads(base64.b64decode(session_cookie))
             return cls.from_json(session)
@@ -24,7 +24,7 @@ class Session:
             return False
 
     @classmethod
-    def from_json(cls, session_json: dict) -> 'Session':
+    def from_json(cls, session_json: dict) -> 'HTTPSession':
         key = session_json.get('key')
         expire = session_json.get('expire')
         return cls(key, expire)
@@ -35,8 +35,8 @@ class Session:
 
 
 if __name__ == '__main__':
-    key = Session._generate_session_key()
+    key = HTTPSession._generate_session_key()
     print(key)
-    encrypted = Session(key, None).encrypt()
+    encrypted = HTTPSession(key, None).encrypt()
     print(encrypted)
-    print(Session.decrypt(encrypted).key)
+    print(HTTPSession.decrypt(encrypted).key)

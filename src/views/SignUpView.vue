@@ -54,7 +54,7 @@
     var confirmPassword = ref('1999donde@');
     var country = ref('');
 
-    var isSigningIn = ref(true);
+    var isSigningIn = ref(false);
 
     const backgroundId = 'sign-up--background';
     

@@ -1,6 +1,8 @@
 class Protocol:
     success = True
     DELETE_CHAR = "del"
+    GAME_ENDED = "end"
+    
     class Encrypt:
         @staticmethod
         def combine(*args):

@@ -3,15 +3,6 @@
 </template>
 
 <style>
-#app {
-  /* font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center; */
-  /* color: #2c3e50; */
-  /* @apply w-screen; */
-}
-
 body {
   @apply bg-gradient-to-b text-center flex justify-center h-screen;
   background: 
