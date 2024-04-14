@@ -43,6 +43,7 @@
     <script setup>
     import TitleComponent from "../components/TitleComponent.vue"
     import CountryDropdown from "../components/CountryDropdown.vue"
+    import Protocol from '../tools/Protocol'
     import axios from 'axios'
     import {ref} from 'vue'
     
@@ -67,6 +68,8 @@
             password: password.value
         });
         console.log(response.data?.success);
+        if (response.data?.status == Protocol.success)
+            emit("leave");
     }
 
     async function signUpWithEmail(event) {
@@ -76,6 +79,8 @@
             email: email.value,
             password: password.value
         });
+        if (response.data?.status == Protocol.success)
+            emit("leave");
     }
 
     function toggleSignInScreen() {

@@ -1,9 +1,9 @@
-from internals.session_utils import handle_session, handle_socket_session
-from race_game import RaceGame
-from client import Client
-from protocol import Protocol
-from starlette.websockets import WebSocketDisconnect
 from fastapi import APIRouter, WebSocket, Request, Response
+from starlette.websockets import WebSocketDisconnect
+from protocol import Protocol
+from client import Client
+from race_game import RaceGame
+from internals.session_utils import handle_session, handle_socket_session
 import sys
 sys.path.append("..")  # Adds higher directory to python modules path.
 
@@ -36,19 +36,33 @@ async def practice_socket(websocket: WebSocket):
     client.socket = websocket
     while client.socket:
         request = await client.socket.receive_text()
-        response = handle_request(client, request)
+        response = handle_socket_request(client, request)
         print("wow, response", response)
         if response:
             try:
                 await client.send_response(response)
             except TypeError:
                 return
-        
-        if response == Protocol.GAME_ENDED:
-            client.close_socket()
+            if response == Protocol.GAME_ENDED:
+                await client.close_socket()
+                client.end_game()
+                return
 
 
-def handle_request(client: Client, request: str) -> str:
+
+def handle_socket_request(client: Client, request: str) -> str:
+    """Get response to a websocket request.
+    Side effects:
+        may change letters in client.race_game
+        may end client.race_game
+
+    Args:
+        client (Client): client in freq battle game
+        request (str): the client request
+
+    Returns:
+        str: response
+    """
     fields = Protocol.Decrypt.seperate_to_fields(request)
     if not fields:
         return Protocol.Error.empty_request
@@ -59,10 +73,14 @@ def handle_request(client: Client, request: str) -> str:
             return Protocol.Error.invalid_request
 
         from_letter, to_letter = args
-        print("from", from_letter, "to", to_letter)
+        print(f"{client.username} | From {from_letter} to {to_letter}")
         client.race_game.guess_letter(from_letter, to_letter)
-        response = Protocol.Encrypt.change_letter(
-            client.race_game.get_gussed_count()
-        )
+
+        if client.race_game.has_won():
+            response = Protocol.GAME_ENDED
+        else:
+            response = Protocol.Encrypt.change_letter(
+                client.race_game.get_gussed_count()
+            )
 
     return response

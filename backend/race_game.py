@@ -9,7 +9,7 @@ class RaceGame:
         self.real_text = text_handler.get_random_text()
 
         self.guessed = {}
-        self.gussed_correctly = 0
+        self.guessed_correctly = 0
 
         cipheredObject = text_handler.cipher_text(self.real_text)
         self.ciphered_text = cipheredObject.text
@@ -39,25 +39,26 @@ class RaceGame:
             # if nothing changed
             if to_letter == already_gussed_letter:
                 return
-            
+
             # if previous letter was correct
             if self.check_guess(from_letter, already_gussed_letter):
-                self.gussed_correctly -= 1
+                self.guessed_correctly -= 1
 
             # if letter deleted
             if to_letter == Protocol.DELETE_CHAR:
-                print(f"deleting dict[{from_letter}] : {self.guessed[from_letter]}")
+                print(
+                    f"deleting dict[{from_letter}] : {self.guessed[from_letter]}")
                 del self.guessed[from_letter]
                 return
         # if tried to delete, but nothing was guessed earlier.
         elif to_letter == Protocol.DELETE_CHAR:
             return
-        
+
         self.guessed[from_letter] = to_letter
         is_correct_letter = self.check_guess(from_letter, to_letter)
         if is_correct_letter:
-            self.gussed_correctly += 1
-        print(f"{self.gussed_correctly} / {self.chipered_letter_count}")
+            self.guessed_correctly += 1
+        print(f"{self.guessed_correctly} / {self.chipered_letter_count}")
 
     def check_guess(self, from_letter, to_letter):
         real_letter = self.decipher_dictionary.get(from_letter)
@@ -65,3 +66,11 @@ class RaceGame:
             return False
 
         return real_letter == to_letter
+
+    def has_won(self) -> bool:
+        """is the game over
+
+        Returns:
+            bool: is the game over
+        """
+        return self.guessed_correctly == self.chipered_letter_count
