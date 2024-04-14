@@ -81,6 +81,25 @@ class Database:
         ''')
         self.conn.commit()
 
+    def get_user_info_by_email(self, email: str) -> str:
+        """fetch username form the database with an email.
+
+        Args:
+            email (str): email
+
+        Returns:
+            str: username"""
+        
+        self.cursor.execute('''
+            SELECT username FROM users WHERE email==(?)
+        ''', (email,))
+        
+        username = self.cursor.fetchone()
+        if not username:
+            return None
+        else:
+            return username[0]
+
     def clear(self):
         self.cursor.execute('''
             DELETE FROM users
