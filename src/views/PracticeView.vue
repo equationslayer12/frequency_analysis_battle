@@ -50,6 +50,9 @@
 
         const message = Protocol.Encrypt.changeLetter(originLetter, gussedLetter);
         socket.onmessage = (event) => {
+            console.log(event.data);
+            if (event.data === Protocol.GAME_ENDED)
+                console.log("haha ended YESSS");
             lettersGuessed.value = event.data;
         }
         socket.send(message);
