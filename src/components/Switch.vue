@@ -19,6 +19,7 @@
 <style>
 /* The switch - the box around the slider */
 .switch {
+  z-index: 0;
   position: relative;
   display: inline-block;
   width: 60px;

@@ -1,5 +1,5 @@
 <template>
-    <div :id="backgroundId" @click="leave" class="bg-black bg-opacity-70 transition-opacity absolute h-full w-full top-0 left-0 flex justify-center items-center">
+    <div :id="backgroundId" @click="leave" class="bg-black bg-opacity-70 transition-opacity absolute z-10 h-full w-full top-0 left-0 flex justify-center items-center">
         <div class="bg-primary-color bg-gradient-to-r from-primary-color to-background-color h-5/6 aspect-[7/10] rounded-xl opacity-100 p-5 transition-opacity">
             <span v-if="!isSigningIn" id="log-in" class="h-full flex flex-col justify-between">
                 <span id="log-in-section">
@@ -46,7 +46,8 @@
     import Protocol from '../tools/Protocol'
     import axios from 'axios'
     import {ref} from 'vue'
-    
+    import clientUser from '../tools/User'
+
     const emit = defineEmits(['leave'])
 
     var username = ref('donde');
@@ -68,8 +69,12 @@
             password: password.value
         });
         console.log(response.data?.success);
-        if (response.data?.status == Protocol.success)
+
+        // if login successful, update user, and leave signup
+        if (response.data?.status == Protocol.success) {
+            clientUser.logIn();
             emit("leave");
+        }
     }
 
     async function signUpWithEmail(event) {

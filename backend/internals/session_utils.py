@@ -27,6 +27,16 @@ def handle_socket_session(websocket) -> Client:
 
 
 def handle_session(request: Request, response: Response) -> Client:
+    """If a request contains cookies, extract the client from it.
+    if it doesn't, create a client and a cookie and attach it to response.
+
+    Args:
+        request (Request): _description_
+        response (Response): _description_
+
+    Returns:
+        Client: _description_
+    """
     client: Client | None = None
 
     session_cookie = request.cookies.get('session')

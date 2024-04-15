@@ -1,4 +1,5 @@
 <template>
+  <NavBar></NavBar>
   <router-view/>
 </template>
 
@@ -12,6 +13,7 @@ body {
 }
 </style>
 
-<script>
+<script setup>
+  import NavBar from './components/NavBar.vue';
   const a = "hello";
 </script>

@@ -31,6 +31,9 @@ class Client:
         
     def end_game(self):
         self.race_game = None
+    
+    def start_game(self):
+        self.race_game = RaceGame()
 
     async def close_socket(self):
         """close the client-server websocket"""

@@ -3,27 +3,30 @@
     <h1 id="title" class="text-white text-8xl">SPAN RACER</h1>
   </div>
   <PinkButton draggable="false" href="/practice">Practice</PinkButton>
-  <PinkButton draggable="false" @click="isSigningUp = true">Login</PinkButton>
-  <PinkButton draggable="false">Sign Up</PinkButton>
   <button @click="test" class="bg-cyan-500 font-bold text-3xl rounded-md p-10">TEST: {{ counter }}</button>
-  <SignUp v-if="isSigningUp" @leave="isSigningUp = false"/>
 </template>
 
 <script setup lang="ts">
-import {ref} from 'vue';
+import { ref } from 'vue';
 import axios from 'axios';
 import PinkButton from '../components/pinkButton.vue'
-import SignUp from './SignUpView.vue'
+import clientUser from '../tools/User'
 
-var isSigningUp = ref(false);
-var isHovered = ref(false);
-var counter = ref('Loading..');
+let isHovered = ref(false);
+let counter = ref('Loading..');
+let username = ref('Guest');
 
 setupCounter();
+setupUsername();
+
 async function setupCounter() {
   const count = await getCount();
   counter.value = count;
 }
+function setupUsername() {
+  clientUser.updateFromCookie();
+}
+
 function test() {
   try {
     counter.value += 1;

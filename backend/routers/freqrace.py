@@ -15,15 +15,17 @@ router = APIRouter()
 def practice(request: Request, response: Response):
     client = handle_session(request, response)
     if not client.race_game:
-        client.race_game = RaceGame()
+        client.start_game()
 
     return {
-        "text": client.race_game.ciphered_text
+        "text": client.race_game.ciphered_text,
+        "cipheredLettersCount": client.race_game.chipered_letter_count
     }
 
 
 @router.websocket("/api/practice")
 async def receive_practice_socket(websocket: WebSocket):
+    print("clinet")
     try:
         await practice_socket(websocket)
     except WebSocketDisconnect:
@@ -44,8 +46,9 @@ async def practice_socket(websocket: WebSocket):
             except TypeError:
                 return
             if response == Protocol.GAME_ENDED:
-                await client.close_socket()
+                print("ended...")
                 client.end_game()
+                client.close_socket()
                 return
 
 
@@ -82,5 +85,11 @@ def handle_socket_request(client: Client, request: str) -> str:
             response = Protocol.Encrypt.change_letter(
                 client.race_game.get_gussed_count()
             )
+
+    if command == Protocol.Command.new_text:
+        print("new texting....")
+        client.end_game()
+        client.start_game()
+        response = Protocol.GAME_ENDED
 
     return response

@@ -14,6 +14,8 @@ class TextUtil {
      * letterBank['P']  // {'count': 3}
      */
     letterBank: Ref<{[key: string]: object}>
+    lettersGuessed: Ref<number>
+    cipheredLettersCount: Ref<number>
     text: string
     wordsArray: string[]
     alphabet: string
@@ -24,6 +26,8 @@ class TextUtil {
         this.alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         this.lettersState = ref({});
         this.letterBank = ref({});
+        this.lettersGuessed = ref(0);
+        this.cipheredLettersCount = ref(0);  // the amount of letters that are ciphered, the rest are not in the text.    
         for (let i = 0; i < this.alphabet.length; i++) {
             const letter = this.alphabet[i];
             this.lettersState.value[letter] = {'display': letter, 'isGuessed': false};
@@ -31,7 +35,25 @@ class TextUtil {
         }
         this.text = '';
         this.wordsArray = [];
-    
+    }
+
+    /**
+     * Reset text utils (letter bank, guessed letters, etc..)
+     * don't reset text.
+     */
+    reset() {
+        this.selectedLetter.value = '';
+        this.hiddenModeActive.value = false;
+        this.lettersState.value = {};
+        this.letterBank.value = {};
+        for (let i = 0; i < this.alphabet.length; i++) {
+            const letter = this.alphabet[i];
+            this.lettersState.value[letter] = {'display': letter, 'isGuessed': false};
+            this.letterBank.value[letter] = {'count': 0};
+        }
+        this.lettersGuessed.value = 0;
+        this.cipheredLettersCount.value = 0;  // the amount of letters that are ciphered, the rest are not in the text.    
+        this.wordsArray = [];
     }
 
     changeSelectedLetter(newLetter: string) {
@@ -49,10 +71,17 @@ class TextUtil {
     }
 }
 
-const textUtil = new TextUtil();
-export const letterBank = textUtil.letterBank;
-export const lettersState = textUtil.lettersState;
-export const selectedLetter = textUtil.selectedLetter;
-export const hiddenModeActive = textUtil.hiddenModeActive;
+let textUtil = new TextUtil();
+export let letterBank = textUtil.letterBank;
+export let lettersState = textUtil.lettersState;
+export let selectedLetter = textUtil.selectedLetter;
+export let hiddenModeActive = textUtil.hiddenModeActive;
+export let lettersGuessed = textUtil.lettersGuessed;
+export let cipheredLettersCount = textUtil.cipheredLettersCount;  // the amount of letters that are ciphered, the rest are not in the text.    
 
 export default textUtil;
+
+export function textUtilReset() {
+    console.log("resettingg text util eeyyess");
+    textUtil.reset();
+}

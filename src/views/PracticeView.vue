@@ -7,11 +7,14 @@
     <span v-else>
         loading...
     </span>
+    <PinkButton @click="newText()">New Text</PinkButton>
 </div>
 </template>
 
 <script setup lang="ts">
+    import { cipheredLettersCount, lettersGuessed, textUtilReset } from '@/tools/TextUtil';
     import CipherAnalysisComponent from '../components/CipherAnalysisComponent.vue';
+    import PinkButton from '../components/pinkButton.vue'
     import Protocol from '../tools/Protocol'
     import axios from 'axios'
     import {ref} from 'vue'
@@ -20,17 +23,23 @@
     const text = ref('');
     var socket: WebSocket | null = null;
 
-    let lettersGuessed = ref(0);
     
     init();
     async function init() {
         await setupText();
         await connectToServerSocket();
     }
+    async function restartPractice() {
+        text.value = '';
+        textUtilReset();
+        await init();
+    }
     async function setupText() {
         const response = await axios.get("/api/practice");
         console.log(response.data);
         text.value = response?.data?.text;
+        cipheredLettersCount.value = response?.data?.cipheredLettersCount
+
         if (text)
             return text;
         else
@@ -48,16 +57,32 @@
         if (socket == null)
             return
 
-        const message = Protocol.Encrypt.changeLetter(originLetter, gussedLetter);
+        const message = Protocol.Request.changeLetter(originLetter, gussedLetter);
         socket.onmessage = (event) => {
             console.log(event.data);
             if (event.data === Protocol.GAME_ENDED)
                 console.log("haha ended YESSS");
-            lettersGuessed.value = event.data;
+            lettersGuessed.value = parseInt(event.data);
         }
         socket.send(message);
     }
 
+    async function newText() {
+        if (socket == null) {
+            restartPractice();
+            return
+        }
+        console.log("receiving new text");
+        const message = Protocol.Request.newText;
+        socket.onmessage = async (event) => {
+            socket?.close();
+            socket = null;
+        }
+        socket.send(message);
+        console.log(`i sent ${message}`);
+        restartPractice();
+
+    }
     /**
      * the more the text is solved, the greener the background is.
      * this function calculates this color
