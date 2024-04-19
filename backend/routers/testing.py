@@ -1,4 +1,4 @@
-from fastapi import APIRouter, WebSocket
+from fastapi import APIRouter, WebSocket, Response
 
 router = APIRouter()
 a = 0
@@ -30,3 +30,19 @@ def test():
 @router.get("/api/test")
 def get_test():
     return str(a)
+
+
+with open("assets/pop.mp3", "rb") as f:
+    pop_file_data = f.read()
+
+
+@router.get("/api/pop.mp3",
+            responses = {
+                200: {
+                    "content": {"audio/mpeg": {}}
+                    }
+                },
+            response_class=Response
+            )
+def pop():
+    return Response(content=pop_file_data, media_type="audio/mpeg")
