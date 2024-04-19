@@ -19,6 +19,7 @@ class TextUtil {
     text: string
     wordsArray: string[]
     alphabet: string
+    gameFinished: Ref<boolean>
 
     constructor() {
         this.selectedLetter = ref('');
@@ -35,6 +36,7 @@ class TextUtil {
         }
         this.text = '';
         this.wordsArray = [];
+        this.gameFinished = ref(false);
     }
 
     /**
@@ -42,6 +44,7 @@ class TextUtil {
      * don't reset text.
      */
     reset() {
+        this.gameFinished.value = false;
         this.selectedLetter.value = '';
         this.hiddenModeActive.value = false;
         this.lettersState.value = {};
@@ -78,7 +81,7 @@ export let selectedLetter = textUtil.selectedLetter;
 export let hiddenModeActive = textUtil.hiddenModeActive;
 export let lettersGuessed = textUtil.lettersGuessed;
 export let cipheredLettersCount = textUtil.cipheredLettersCount;  // the amount of letters that are ciphered, the rest are not in the text.    
-
+export let gameFinished = textUtil.gameFinished
 export default textUtil;
 
 export function textUtilReset() {

@@ -25,16 +25,20 @@ def practice(request: Request, response: Response):
 
 @router.websocket("/api/practice")
 async def receive_practice_socket(websocket: WebSocket):
-    print("clinet")
     try:
         await practice_socket(websocket)
     except WebSocketDisconnect:
         print("Client disconnected")
+        return Protocol.Error.invalid_request
 
 
 async def practice_socket(websocket: WebSocket):
     await websocket.accept()
+
     client = handle_socket_session(websocket)
+    if not client:
+        print("client is none... why??")
+        return None
     client.socket = websocket
     while client.socket:
         request = await client.socket.receive_text()

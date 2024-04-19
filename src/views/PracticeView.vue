@@ -1,6 +1,7 @@
 <template>
 <div id="background" class="bg-gradient-to-b from-background-color to-black text-center flex flex-col items-center h-screen">
     <h1 class="text-4xl font-semibold my-14 hover:scale-125 duration-150 text-text-color">Span Racer</h1>
+    <PinkButton v-if="gameFinished">Congratulations!</PinkButton>
     <span v-if="text">
         <CipherAnalysisComponent :text="text" @letterChange="sendChangedLetter"/>
     </span>
@@ -12,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-    import { cipheredLettersCount, lettersGuessed, textUtilReset } from '@/tools/TextUtil';
+    import textUtil, { cipheredLettersCount, lettersGuessed, gameFinished, textUtilReset } from '@/tools/TextUtil';
     import CipherAnalysisComponent from '../components/CipherAnalysisComponent.vue';
     import PinkButton from '../components/pinkButton.vue'
     import Protocol from '../tools/Protocol'
@@ -21,8 +22,7 @@
 
     // const text = "DJ DK C QLXDWI WF SDGDU PCX. XLRLU KQCSLKBDQK, KJXDHDET FXWZ C BDIILE RCKL, BCGL PWE JBLDX FDXKJ GDSJWXO CTCDEKJ JBL LGDU TCUCSJDS LZQDXL. IYXDET JBL RCJJUL, XLRLU KQDLK ZCECTLI JW KJLCU KLSXLJ QUCEK JW JBL LZQDXL’K YUJDZCJL PLCQWE, JBL ILCJB KJCX, CE CXZWXLI KQCSL KJCJDWE PDJB LEWYTB QWPLX JW ILKJXWO CE LEJDXL QUCELJ. QYXKYLI RO JBL LZQDXL’K KDEDKJLX CTLEJK, QXDESLKK ULDC XCSLK BWZL CRWCXI BLX KJCXKBDQ, SYKJWIDCE WF JBL KJWULE QUCEK JBCJ SCE KCGL BLX QLWQUL CEI XLKJWXL FXLLIWZ JW JBL TCUCVO…";
     const text = ref('');
-    var socket: WebSocket | null = null;
-
+    let socket: WebSocket | null = null;
     
     init();
     async function init() {
@@ -60,9 +60,14 @@
         const message = Protocol.Request.changeLetter(originLetter, gussedLetter);
         socket.onmessage = (event) => {
             console.log(event.data);
-            if (event.data === Protocol.GAME_ENDED)
+            if (event.data === Protocol.GAME_ENDED) {
                 console.log("haha ended YESSS");
-            lettersGuessed.value = parseInt(event.data);
+                textUtil.gameFinished.value = true;
+                lettersGuessed.value = textUtil.cipheredLettersCount.value;
+            }
+            else {
+                lettersGuessed.value = parseInt(event.data);
+            }
         }
         socket.send(message);
     }
