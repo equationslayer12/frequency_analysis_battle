@@ -2,8 +2,9 @@
 <div id="background" class="bg-gradient-to-b from-background-color to-black text-center flex flex-col items-center h-screen">
     <h1 class="text-4xl font-semibold my-14 hover:scale-125 duration-150 text-text-color">Span Racer</h1>
     <PinkButton v-if="gameFinished">Congratulations!</PinkButton>
-    <span v-if="text">
-        <CipherAnalysisComponent :text="text" @letterChange="sendChangedLetter"/>
+    <!-- try game.finished instead of gameFinished -->
+    <span v-if="game.text">
+        <CipherAnalysisComponent @letterChange="sendChangedLetter"/>
     </span>
     <span v-else>
         loading...
@@ -13,15 +14,13 @@
 </template>
 
 <script setup lang="ts">
-    import textUtil, { cipheredLettersCount, lettersGuessed, gameFinished, textUtilReset } from '@/tools/TextUtil';
-    import CipherAnalysisComponent from '../components/CipherAnalysisComponent.vue';
-    import PinkButton from '../components/pinkButton.vue'
-    import Protocol from '../tools/Protocol'
+    import { game, cipheredLettersCount, gameFinished, selectedLetter } from '@/game/Game';
+    import CipherAnalysisComponent from '@/components/CipherAnalysisComponent.vue';
+    import PinkButton from '@/components/pinkButton.vue'
+    import Protocol from '@/webclient/Protocol'
     import axios from 'axios'
     import {ref} from 'vue'
 
-    // const text = "DJ DK C QLXDWI WF SDGDU PCX. XLRLU KQCSLKBDQK, KJXDHDET FXWZ C BDIILE RCKL, BCGL PWE JBLDX FDXKJ GDSJWXO CTCDEKJ JBL LGDU TCUCSJDS LZQDXL. IYXDET JBL RCJJUL, XLRLU KQDLK ZCECTLI JW KJLCU KLSXLJ QUCEK JW JBL LZQDXL’K YUJDZCJL PLCQWE, JBL ILCJB KJCX, CE CXZWXLI KQCSL KJCJDWE PDJB LEWYTB QWPLX JW ILKJXWO CE LEJDXL QUCELJ. QYXKYLI RO JBL LZQDXL’K KDEDKJLX CTLEJK, QXDESLKK ULDC XCSLK BWZL CRWCXI BLX KJCXKBDQ, SYKJWIDCE WF JBL KJWULE QUCEK JBCJ SCE KCGL BLX QLWQUL CEI XLKJWXL FXLLIWZ JW JBL TCUCVO…";
-    const text = ref('');
     let socket: WebSocket | null = null;
     
     init();
@@ -30,18 +29,17 @@
         await connectToServerSocket();
     }
     async function restartPractice() {
-        text.value = '';
-        textUtilReset();
+        game.reset();
         await init();
     }
     async function setupText() {
         const response = await axios.get("/api/practice");
         console.log(response.data);
-        text.value = response?.data?.text;
+        const text = response?.data?.text;
         cipheredLettersCount.value = response?.data?.cipheredLettersCount
 
         if (text)
-            return text;
+            game.setText(text);
         else
             return null;
     }
@@ -62,11 +60,10 @@
             console.log(event.data);
             if (event.data === Protocol.GAME_ENDED) {
                 console.log("haha ended YESSS");
-                textUtil.gameFinished.value = true;
-                lettersGuessed.value = textUtil.cipheredLettersCount.value;
+                game.endGame();
             }
             else {
-                lettersGuessed.value = parseInt(event.data);
+                game.textState.totalLettersGuessed.value = parseInt(event.data);
             }
         }
         socket.send(message);

@@ -42,9 +42,6 @@
         </section>
 
         <!-- Ngrams utility -->
-        <!-- <section v-if="selectedTool == toolNames[NGRAMS_TOOL]">
-            {{ ngramAnalysis.Nsize }}
-        </section> -->
         <section v-if="selectedTool == toolNames[NGRAMS_TOOL]">
             <nav class="flex justify-center items-center m-1 mb-0 space-x-1">
                 <button title="Decrease N size" class="p-2 bg-primary-color text-text-color hover:bg-text-color hover:text-background-color duration-300 rounded-md" @click="ngramAnalysis.changeNSize(-1)">&#60;</button>
@@ -77,14 +74,11 @@
 </template>
 
 <script setup>
+import { alphabet } from '@/Constants';
 import LetterComponent from '../components/LetterComponent.vue'
 import nGramAnalysis from '../tools/nGramAnalysis'
-import textUtil from '../tools/TextUtil'
+import { game } from '@/game/Game'
 import { ref } from 'vue'
-
-// const props = defineProps(['text', 'letters', 'isHidden', 'selectedLetter'])
-// const emit = defineEmits(['changeSelectedLetter'])
-const text = removePunc(textUtil.text);
 
 const LETTERS_TOOL = 0;
 const WORDS_TOOL = 1;
@@ -98,24 +92,22 @@ const toolDescriptions = {
 const toolNames = ref(Object.keys(toolDescriptions));
 var selectedTool = ref(toolNames.value[LETTERS_TOOL]);
 
-const abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
 // Letters utility
 var lettersCount = ref({})
-for (let i = 0; i < abc.length; i++) {
-    const letter = abc[i];
+for (let i = 0; i < alphabet.length; i++) {
+    const letter = alphabet[i];
     lettersCount.value[letter] = 0;
 }
-countLetters(textUtil.text);
+countLetters(game.cleanText);
 
 // Words utility
-var currentWordPage = ref(0);
+let currentWordPage = ref(0);
 const wordsPerPage = 6;
 
-var wordsCount = ref({})
+let wordsCount = ref({})
 
-for (let i = 0; i < textUtil.wordsArray.length; i++) {
-    const word = textUtil.wordsArray[i];
+for (let i = 0; i < game.wordsArray.length; i++) {
+    const word = game.wordsArray[i];
     if (wordsCount.value[word])
         wordsCount.value[word] ++;
     else
@@ -155,15 +147,11 @@ function isLetter(letter) {
     return /^[A-Z]$/.test(letter);
 }
 
-function removePunc(str) {
-    return str.replace(/[^\w\s\']|_/g, "")
-              .replace(/\s+/g, " ")
-}
 
 var maxLetterCount = 0;
 
-for (let i = 0; i < textUtil.text.length; i++) {
-    const letter = textUtil.text[i];
+for (let i = 0; i < game.cleanText.length; i++) {
+    const letter = game.cleanText[i];
     if(isLetter(letter)) {
         maxLetterCount = Math.max(lettersCount.value[letter], maxLetterCount);
     }
@@ -180,9 +168,6 @@ function findMaxWordCountForPage() {
     return maxWordCount;
 }
 
-function forwardChangeSelectedLetter(newLetter) {
-    emit('changeSelectedLetter', newLetter);
-}
 </script>
 
 <style scoped>

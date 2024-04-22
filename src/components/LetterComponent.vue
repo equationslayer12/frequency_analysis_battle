@@ -1,35 +1,44 @@
 <template>
-<span v-if="letter !== ' '" :original-letter="letter" @mouseover="hoverLetter" @mouseleave="textUtil.changeSelectedLetter('')">
+
+<span v-if="letter !== ' '" @mouseover="selectLetter()" @mouseleave="unselectLetter()">
     <!-- letter isn't in alphabet -->
-    <span v-if="!textUtil.isLetter(letter)">{{ letter }} </span>  
+    <span v-if="!isAlphabet">{{ letter }} </span>  
     
     <!-- hidden mode is activated, display a * -->
-    <span v-else-if="(!lettersState[letter].isGuessed) && hiddenModeActive" class="duration-300" :class="{'guessed': lettersState[letter].isGuessed, 'selected': letter == textUtil.selectedLetter.value}">*</span>
+    <span v-else-if="(!letterState.isGuessed) && hiddenModeActive" class="duration-300" :class="{'guessed': letterState.isGuessed, 'selected': letter == selectedLetter}">*</span>
     <!--  -->
-    <span v-else-if="letter in lettersState" class="duration-300" :class="{
-        'guessed': lettersState[letter].isGuessed,
+    <span v-else class="duration-300" :class="{
+        'guessed': letterState.isGuessed,
         'selected': letter == selectedLetter,
-        'duplicate': isDuplicate(letter)
-    }">{{ lettersState[letter].display }}</span>
-    <span v-else class="duration-300">{{ letter }}</span>
+        'duplicate': isDuplicate(letter) && letterState.isGuessed
+    }">{{ letterState.displayLetter }}</span>
 </span>
 
 </template>
 
 <script setup>
-import textUtil from '../tools/TextUtil'
-import { letterBank, lettersState, selectedLetter, hiddenModeActive } from '../tools/TextUtil';
+import { LetterState } from '@/game/LetterState';
+import { game, lettersState, selectedLetter, hiddenModeActive } from '@/game/Game';
 
 const props = defineProps(['letter'])
+const letter = props.letter;
 
-function hoverLetter(event) {
-    let letterElement = event.target.parentElement;
-    textUtil.changeSelectedLetter(
-        letterElement.getAttribute('original-letter')
-    );
+let isAlphabet = true;
+const letterState = lettersState[letter];
+if (letterState == undefined)
+    isAlphabet = false;
+
+function isDuplicate() {
+    const guessedLetter = letterState.value.displayLetter;
+    const guessedLetterState = lettersState[guessedLetter];
+    return guessedLetterState.value.otherLettersGuessedCount > 1;
 }
-function isDuplicate(originalLetter) {
-    let displayLetter = lettersState.value[originalLetter].display
-    return letterBank.value[displayLetter].count > 1;
+
+function selectLetter() {
+    game.textState.selectLetter(letter, isAlphabet);
+}
+
+function unselectLetter() {
+    game.textState.unselectLetter();
 }
 </script>

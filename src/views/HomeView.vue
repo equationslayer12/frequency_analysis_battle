@@ -10,7 +10,7 @@
 import { ref } from 'vue';
 import axios from 'axios';
 import PinkButton from '../components/pinkButton.vue'
-import clientUser from '../tools/User'
+import clientUser from '../user/ClientUser'
 
 let isHovered = ref(false);
 let counter = ref('Loading..');
@@ -24,7 +24,7 @@ async function setupCounter() {
   counter.value = count;
 }
 function setupUsername() {
-  clientUser.updateFromCookie();
+  clientUser.updateFromSession();
 }
 
 function test() {

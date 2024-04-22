@@ -1,4 +1,4 @@
-export default class SessionUtils {
+export default class SessionHandle {
     static getCookie(cookieName: string) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${cookieName}=`);
@@ -6,11 +6,4 @@ export default class SessionUtils {
             return parts.pop()?.split(';').shift();
     }
 
-    static encryptUsername(username: string) {
-        return username;
-    }
-
-    static decryptUsername(username: string) {
-        return username;
-    }
 }

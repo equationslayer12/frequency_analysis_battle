@@ -43,10 +43,10 @@
     <script setup>
     import TitleComponent from "../components/TitleComponent.vue"
     import CountryDropdown from "../components/CountryDropdown.vue"
-    import Protocol from '../tools/Protocol'
+    import Protocol from '../webclient/Protocol'
     import axios from 'axios'
     import {ref} from 'vue'
-    import clientUser from '../tools/User'
+    import clientUser from '@/user/ClientUser'
 
     const emit = defineEmits(['leave'])
 

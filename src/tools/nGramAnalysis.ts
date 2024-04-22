@@ -1,4 +1,4 @@
-import textUtil from '../tools/TextUtil'
+import { game } from '@/game/Game'
 import {ref, Ref} from 'vue'
 
 /**
@@ -38,19 +38,18 @@ export default class nGramAnalysis {
         
         let totalNgrams = Object.keys(this.NgramsCount.value).length
         this.maxPage = ref(Math.ceil(totalNgrams / this.nGramsPerPage.value));
-        console.log(this.maxPage.value);
     }
 
     /**
      * count the N-Grams in the words array, and update NgramsCount and mostFrequentNgrams accordingly.
      */
     _countNgrams() {
-        for (var nGram in this.NgramsCount.value)
+        for (let nGram in this.NgramsCount.value)
             delete this.NgramsCount.value[nGram];
 
         this.NgramsCount.value = {};
-        for (let i = 0; i < textUtil.wordsArray.length; i++) {
-            const word = textUtil.wordsArray[i];
+        for (let i = 0; i < game.wordsArray.length; i++) {
+            const word = game.wordsArray[i];
             for (let j = 0; j < word.length - this.Nsize.value + 1; j++) {
                 const nGram = word.slice(j, j + this.Nsize.value);
                 if (this.NgramsCount.value[nGram])
@@ -100,35 +99,3 @@ export default class nGramAnalysis {
         }
     }
 }
-
-
-// var NgramsCount = ref({});
-
-
-
-// function updateNgramPage(count) {
-//     currentNgramPage.value += count;
-//     if (currentNgramPage.value < 0) {
-//         currentNgramPage.value = maxNgramPage - 1;
-//     }
-//     else if (maxNgramPage <= currentNgramPage.value) {
-//         currentNgramPage.value %= maxNgramPage;
-//     }
-//     maxNgramCountForPage = findMaxNgramCountForPage();
-//     console.log(maxNgramCountForPage);
-// }
-
-// var maxNgramCountForPage = findMaxNgramCountForPage();
-// function findMaxNgramCountForPage() {
-    
-//     var maxNgramCount = 0;
-//     console.log(maxNgramCount);
-//     for (let i = currentNgramPage.value*nGramsPerPage; i < currentNgramPage.value*nGramsPerPage + nGramsPerPage; i++) {
-//         console.log(` current index: ${i}`);
-//         const nGram = mostFrequentNgrams[i];
-//         console.log(` current nGram: ${nGram}`);
-//         maxNgramCount = Math.max(NgramsCount.value[nGram], maxNgramCount);
-//     }
-//     console.log(maxNgramCount);
-//     return maxNgramCount;
-// }

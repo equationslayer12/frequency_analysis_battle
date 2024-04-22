@@ -7,5 +7,14 @@ export default class Protocol {
         static changeLetter(originLetter: string, gussedLetter: string) {
             return `CL;${originLetter};${gussedLetter}`
         }
-    }
+    };
+
+    static Sessions = class {
+        static decryptUsername(username: string) {
+            return username;
+        };
+        static encryptUsername(username: string) {
+            return username;
+        };    
+    };
 }
