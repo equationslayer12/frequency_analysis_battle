@@ -3,7 +3,7 @@
     <h1 class="text-4xl font-semibold my-14 hover:scale-125 duration-150 text-text-color">Span Racer</h1>
     <PinkButton v-if="gameFinished">Congratulations!</PinkButton>
     <!-- try game.finished instead of gameFinished -->
-    <span v-if="game.text">
+    <span v-if="game.text.value">
         <CipherAnalysisComponent @letterChange="sendChangedLetter"/>
     </span>
     <span v-else>
@@ -18,10 +18,10 @@
     import CipherAnalysisComponent from '@/components/CipherAnalysisComponent.vue';
     import PinkButton from '@/components/pinkButton.vue'
     import Protocol from '@/webclient/Protocol'
-    import axios from 'axios'
-    import {ref} from 'vue'
+    import HTTPClient from '@/webclient/HTTPClient';
+    import SocketClient from '@/webclient/SocketClient';
 
-    let socket: WebSocket | null = null;
+    let socketClient: SocketClient = new SocketClient();
     
     init();
     async function init() {
@@ -33,55 +33,50 @@
         await init();
     }
     async function setupText() {
-        const response = await axios.get("/api/practice");
-        console.log(response.data);
-        const text = response?.data?.text;
-        cipheredLettersCount.value = response?.data?.cipheredLettersCount
+        const response = await HTTPClient.APIRequest("/practice")
+        const text = response?.text;
+        const cipheredLettersCount = response?.cipheredLettersCount;
+        if (text === undefined || cipheredLettersCount === undefined)
+            return null
 
-        if (text)
-            game.setText(text);
-        else
-            return null;
+        game.setText(text, cipheredLettersCount);
     }
     async function connectToServerSocket() {
         console.log("start connecting")
-        var ws = new WebSocket('ws://localhost:8080/api/practice')
-        ws.onopen = (event) => {
-            console.log("Connected to server socket");
-            socket = ws;
-        };
+        socketClient.connectToServer();
     }
     async function sendChangedLetter(originLetter: string, gussedLetter: string) {
-        if (socket == null)
+        if (!socketClient.isConnected())
             return
 
-        const message = Protocol.Request.changeLetter(originLetter, gussedLetter);
-        socket.onmessage = (event) => {
-            console.log(event.data);
-            if (event.data === Protocol.GAME_ENDED) {
-                console.log("haha ended YESSS");
-                game.endGame();
-            }
-            else {
-                game.textState.totalLettersGuessed.value = parseInt(event.data);
-            }
+        const request = Protocol.Request.changeLetter(originLetter, gussedLetter);
+        const response = await socketClient.sendAndReceive(request);
+
+        console.log(response);
+        if (!response)
+            return
+
+        if (response === Protocol.GAME_ENDED) {
+            console.log("haha ended YESSS");
+            socketClient.disconnect();
+            game.endGame();
         }
-        socket.send(message);
+        else {
+            game.textState.totalLettersGuessed.value = parseInt(response);
+        }
     }
 
     async function newText() {
-        if (socket == null) {
+        if (!socketClient.isConnected()) {
             restartPractice();
             return
         }
         console.log("receiving new text");
-        const message = Protocol.Request.newText;
-        socket.onmessage = async (event) => {
-            socket?.close();
-            socket = null;
-        }
-        socket.send(message);
-        console.log(`i sent ${message}`);
+
+        const request = Protocol.Request.newText;
+        const response = await socketClient.sendAndReceive(request);
+
+        socketClient.disconnect();
         restartPractice();
 
     }

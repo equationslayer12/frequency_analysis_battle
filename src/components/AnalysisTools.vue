@@ -136,10 +136,8 @@ const ngramAnalysis = new nGramAnalysis(3);
 function countLetters(text) {
     for (let i = 0; i < text.length; i++) {
         const letter = text[i];
-        if (isLetter(letter)) {
+        if (game.textState.isLetter(letter))
             lettersCount.value[letter]++;
-        }
-        
     }
 }
 
@@ -174,4 +172,4 @@ function findMaxWordCountForPage() {
 .selected {
     @apply font-bold bg-secondary-color
 }
-</style>
+</style> 

@@ -26,10 +26,12 @@ class Game {
         this.isFinished = ref(false);
     }
     
-    setText(text: string) {
+    setText(text: string, cipheredLettersCount: number) {
         this.text.value = text;
         this.wordsArray = text.split(" ");
         this.cleanText = removePunc(text);
+
+        this.cipheredLettersCount.value = cipheredLettersCount
     }
 
     changeLetter(fromLetter: string, toLetter: string) {
@@ -64,7 +66,8 @@ class Game {
         this.textState.totalLettersGuessed.value = this.cipheredLettersCount.value
     }
     reset() {
-        this.setText("")
+        this.isFinished.value = false;
+        this.setText("", 0)
         this.textState.reset();
     }
 }
@@ -80,4 +83,4 @@ export let unselectLetter = game.textState.unselectLetter;
 export let isLetter = game.textState.isLetter;
 
 export let cipheredLettersCount = game.cipheredLettersCount;  // the amount of letters that are ciphered, the rest are not in the text.    
-export let gameFinished = game.isFinished
+export let gameFinished = game.isFinished;
