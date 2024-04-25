@@ -47,6 +47,7 @@
     import axios from 'axios'
     import {ref} from 'vue'
     import clientUser from '@/user/ClientUser'
+    import HTTPClient from "@/webclient/HTTPClient"
 
     const emit = defineEmits(['leave'])
 
@@ -64,28 +65,33 @@
         console.log(email.value);
         console.log(password.value);
     
-        const response = await axios.post('/api/log-in', {
+        const response = await HTTPClient.APIRequestPost("/log-in", {
             email: email.value,
             password: password.value
-        });
-        console.log(response.data?.success);
+        })
+        console.log(response.success);
 
         // if login successful, update user, and leave signup
-        if (response.data?.status == Protocol.success) {
+        if (response.status == Protocol.success) {
             clientUser.logIn();
             emit("leave");
         }
+        console.log(response);
     }
 
     async function signUpWithEmail(event) {
-        const response = await axios.post('/api/sign-up', {
+        const response = await HTTPClient.APIRequestPost('/sign-up', {
             username: username.value,
             country: country.value,
             email: email.value,
             password: password.value
         });
-        if (response.data?.status == Protocol.success)
+
+        if (response.status == Protocol.success)
             emit("leave");
+        
+        console.log(response);
+        
     }
 
     function toggleSignInScreen() {
