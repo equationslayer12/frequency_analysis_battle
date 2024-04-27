@@ -12,7 +12,7 @@
             <div id="table" class="text-secondary-color p-2 flex justify-between items-end">
                 <span v-for="[letter, count] in Object.entries(lettersCount)">
                     <p>{{ count }}</p>
-                    <div class="bg-text-color w-4 border-solid border-primary-color border-1" :style="{'height': `${count / maxLetterCount * 6}em`}"></div>
+                    <div class="bg-text-color w-4 border-solid border-primary-color border-1" :style="{'height': `${Math.max(0.1, count / maxLetterCount * 6)}em`}"></div>
                     <p>{{ letter }}</p>
                     <LetterComponent class="border-b-2 border-primary-color" :letter="letter"/>
                 </span>
