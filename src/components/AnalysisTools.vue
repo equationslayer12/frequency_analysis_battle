@@ -1,15 +1,15 @@
 <template>
-    <div id="analysis-tools" class="bg-background-color min-h-56 w-full border-primary-color flex flex-col justify-between border-solid border-4 rounded-md mt-3">
-        <nav class="flex justify-around content-stretch border-b-4 border-primary-color cursor-pointer">
+    <div id="analysis-tools" class="bg-background-color w-full border-primary-color flex flex-col border-solid border-4 rounded-md">
+        <nav class="mb-md flex justify-around content-stretch border-b-4 border-primary-color cursor-pointer">
             <div v-for="toolName in toolNames" @click="selectedTool = toolName" class="bg-primary-color text-text-color flex-grow hover:bg-text-color hover:text-background-color duration-300"
             :class="{'selected': toolName == selectedTool}"
             :title="toolDescriptions[toolName]"
             >{{ toolName }}</div>
         </nav>
-
+        
         <!-- Letters utility -->
         <section v-if="selectedTool == toolNames[LETTERS_TOOL]">
-            <div id="table" class="text-secondary-color p-2 flex justify-between items-end">
+            <div id="table" class="text-secondary-color mx-md mb-lg flex justify-between items-end">
                 <span v-for="[letter, count] in Object.entries(lettersCount)">
                     <p>{{ count }}</p>
                     <div class="bg-text-color w-4 border-solid border-primary-color border-1" :style="{'height': `${Math.max(0.1, count / maxLetterCount * 6)}em`}"></div>
@@ -21,17 +21,17 @@
 
         <!-- Words utility -->
         <section v-if="selectedTool == toolNames[WORDS_TOOL]">
-            <nav class="flex justify-center items-center m-1 mb-0 space-x-1">
+            <nav class="mb-sm flex justify-center items-center space-x-sm">
                 <button title="Go back" class="p-2 bg-primary-color text-text-color hover:bg-text-color hover:text-background-color duration-300 rounded-md" @click="updateWordsPage(-1)">&#60;</button>
                 <span class="text-text-color">{{ currentWordPage + 1 }} / {{ maxWordPage }}</span>
                 <button title="Go forward" class="p-2 bg-primary-color text-text-color hover:bg-text-color hover:text-background-color duration-300 rounded-md" @click="updateWordsPage(1)">&#62;</button>
             </nav>
-            <div id="table" class="text-secondary-color p-2 pt-0 flex justify-between items-end">
+            <div id="table" class="text-secondary-color mx-md mb-lg flex justify-between items-end">
                 <span v-for="word in mostFrequentWords.slice(currentWordPage * wordsPerPage, currentWordPage * wordsPerPage + wordsPerPage)"
                     class="flex flex-col justify-center items-center"
                 >
                     {{ wordsCount[word] }}
-                    <div class="bg-text-color w-14 border-solid border-primary-color border-1" :style="{'height': `${wordsCount[word] / maxWordCountForPage * 6}em`}"></div>
+                    <div class="bg-text-color w-14 rounded-sm border-solid border-primary-color border-1" :style="{'height': `${wordsCount[word] / maxWordCountForPage * 6}em`}"></div>
                     <span>
                         <span v-for="letter in word">
                             <LetterComponent :letter="letter"/>
@@ -43,19 +43,17 @@
 
         <!-- Ngrams utility -->
         <section v-if="selectedTool == toolNames[NGRAMS_TOOL]">
-            <nav class="flex justify-center items-center m-1 mb-0 space-x-1">
+            <nav class="mb-sm flex justify-center items-center space-x-sm">
                 <button title="Decrease N size" class="p-2 bg-primary-color text-text-color hover:bg-text-color hover:text-background-color duration-300 rounded-md" @click="ngramAnalysis.changeNSize(-1)">&#60;</button>
                 <div class="inline-flex flex-col">
                     <span class="text-text-color font-bold">{{ ngramAnalysis.Nsize }}</span>
                     <p class="text-text-color">N Size</p>
                 </div>
                 <button title="Increase N Size" class="p-2 bg-primary-color text-text-color hover:bg-text-color hover:text-background-color duration-300 rounded-md" @click="ngramAnalysis.changeNSize(1)">&#62;</button>
-                
-                <div id="table"></div>
             </nav>
             
             
-            <div id="table" class="text-secondary-color p-2 pt-0 flex justify-between items-end">
+            <div id="table" class="mx-md mb-lg text-secondary-color flex justify-between items-end">
                 <span v-for="nGram in ngramAnalysis.mostFrequentNgrams.value.slice(ngramAnalysis.currentPage.value * ngramAnalysis.nGramsPerPage.value, ngramAnalysis.currentPage.value * ngramAnalysis.nGramsPerPage.value + ngramAnalysis.nGramsPerPage.value)"
                     class="flex flex-col justify-center items-center"
                 >

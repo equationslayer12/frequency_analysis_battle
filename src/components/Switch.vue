@@ -1,7 +1,7 @@
 <template>
-    <div class="w-full flex justify-center items-center text-xs underline">
+    <div class="w-full flex justify-center gap-x-sm items-center text-xs underline h-min">
         <p>SHOW</p>
-        <label class="switch scale-75" id="hiddenSwitch">
+        <label class="switch scale" id="hiddenSwitch">
             <input type="checkbox" @change="$emit('toggle')">
             <span class="slider round">
 
@@ -22,8 +22,8 @@
   z-index: 0;
   position: relative;
   display: inline-block;
-  width: 60px;
-  height: 34px;
+  width: 45px;
+  height: 25.5px;
 }
 
 /* Hide default HTML checkbox */
@@ -50,23 +50,23 @@
   @apply bg-text-color;
   position: absolute;
   content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
+  height: 19.5px;
+  width: 19.5px;
+  left: 3px;
+  bottom: 3px;
   -webkit-transition: .4s;
   transition: .4s;
 }
 
 input:checked + .slider:before {
-  -webkit-transform: translateX(26px);
-  -ms-transform: translateX(26px);
-  transform: translateX(26px);
+  -webkit-transform: translateX(19.5px);
+  -ms-transform: translateX(19.5px);
+  transform: translateX(19.5px);
 }
 
 /* Rounded sliders */
 .slider.round {
-  border-radius: 34px;
+  border-radius: 25.5px;
 }
 
 .slider.round:before {
