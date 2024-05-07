@@ -1,4 +1,5 @@
 import random
+from backend.internals.encryption.aes import AESCipher
 from internals.http_session import HTTPSession
 from race_game import RaceGame
 from fastapi import WebSocket
@@ -9,7 +10,21 @@ class Client:
         self.session: HTTPSession = session
         self.username: str = "Guest"
         self.socket: WebSocket = None
+        self.AESC: AESCipher = None
         self.race_game: RaceGame = None
+
+    def set_aes_key(self, aes_key: str):
+        self.AESC: AESCipher = AESCipher(key=aes_key)
+
+    def decrypt(self, encrypted_message: str):
+        if not self.AESC:
+            print("no aesc")
+            return None
+        try:
+            return self.AESC.decrypt(encrypted_message)
+        except Exception as e:
+            print(e)
+            return None
 
     def log_in(self, username: str):
         self.is_guest = False
@@ -39,3 +54,4 @@ class Client:
         """close the client-server websocket"""
         if self.socket:
             await self.socket.close()
+    

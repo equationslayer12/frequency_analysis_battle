@@ -18,7 +18,7 @@
     import CipherAnalysisComponent from '@/components/CipherAnalysisComponent.vue';
     import PinkButton from '@/components/pinkButton.vue'
     import Protocol from '@/webclient/Protocol'
-    import HTTPClient from '@/webclient/HTTPClient';
+    import { webClient } from '@/webclient/WebClient';
     import SocketClient from '@/webclient/SocketClient';
 
     let socketClient: SocketClient = new SocketClient();
@@ -33,7 +33,7 @@
         await init();
     }
     async function setupText() {
-        const response = await HTTPClient.APIRequest("/practice")
+        const response = await webClient.APIRequest("/practice");
         const text = response?.text;
         const cipheredLettersCount = response?.cipheredLettersCount;
         if (text === undefined || cipheredLettersCount === undefined)

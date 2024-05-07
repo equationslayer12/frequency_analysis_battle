@@ -67,7 +67,7 @@ class Database:
             password=password.encode(),
             hashed_password=db_password
         )
-        return flag
+        return Protocol.success if flag else flag
 
     def create_users_table(self):
         self.cursor.execute('''

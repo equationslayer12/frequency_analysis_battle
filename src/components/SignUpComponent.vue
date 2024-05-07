@@ -44,10 +44,9 @@
     import TitleComponent from "../components/TitleComponent.vue"
     import CountryDropdown from "../components/CountryDropdown.vue"
     import Protocol from '../webclient/Protocol'
-    import axios from 'axios'
     import {ref} from 'vue'
     import clientUser from '@/user/ClientUser'
-    import HTTPClient from "@/webclient/HTTPClient"
+    import { webClient } from "@/webclient/WebClient"
 
     const emit = defineEmits(['leave'])
 
@@ -65,14 +64,14 @@
         console.log(email.value);
         console.log(password.value);
     
-        const response = await HTTPClient.APIRequestPost("/log-in", {
+        const response = await webClient.APIRequestPost("/log-in", {
             email: email.value,
             password: password.value
         })
         console.log(response.success);
 
         // if login successful, update user, and leave signup
-        if (response.status == Protocol.success) {
+        if (response.success == Protocol.success) {
             clientUser.logIn();
             emit("leave");
         }
@@ -80,7 +79,7 @@
     }
 
     async function signUpWithEmail(event) {
-        const response = await HTTPClient.APIRequestPost('/sign-up', {
+        const response = await webClient.APIRequestPost('/sign-up', {
             username: username.value,
             country: country.value,
             email: email.value,

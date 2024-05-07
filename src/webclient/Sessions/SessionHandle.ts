@@ -5,5 +5,4 @@ export default class SessionHandle {
         if (parts.length === 2)
             return parts.pop()?.split(';').shift();
     }
-
 }

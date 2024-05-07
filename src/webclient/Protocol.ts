@@ -1,6 +1,7 @@
 export default class Protocol {
     static deleteChar: string = "del";
     static GAME_ENDED: string = "end";
+    static success: string = "success";
     
     static Request = class {
         static newText = "new";  // request a new text

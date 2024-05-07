@@ -1,5 +1,5 @@
 class Protocol:
-    success = True
+    success = "success"
     DELETE_CHAR = "del"
     GAME_ENDED = "end"
     

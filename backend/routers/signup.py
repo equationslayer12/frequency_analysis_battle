@@ -14,19 +14,23 @@ db = Database.get_instance("users.db")
 async def log_in_with_email(request: Request, response: Response):
     info = await request.json()
 
-    email = info.get('email')
-    password = info.get('password')
+    enc_email = info.get('email')
+    enc_password = info.get('password')
 
-    print(email, password)
-
-    if not (email and password):
+    if not (enc_email and enc_password):
         return Protocol.Error.invalid_request
 
+    client = handle_session(request, response)
+
+    email, password = client.decrypt(enc_email), client.decrypt(enc_password)
+    print(email, password)
+    print(info)
+
     log_in_success = db.log_in(email, password)
+    print(log_in_success)
     if log_in_success == Protocol.success:
         username = db.get_user_info_by_email(email)
-        client = handle_session(request, response)
-        print("clienting", client)
+        print("clienting", client.username)
         client.log_in(username)
         set_username_cookie(client, response)
         
@@ -37,6 +41,8 @@ async def log_in_with_email(request: Request, response: Response):
 
 @router.post("/api/sign-up")
 async def sign_up(request: Request, response: Response):
+    client = handle_session(request, response)
+
     info = await request.json()
 
     username = info.get('username')
@@ -44,16 +50,20 @@ async def sign_up(request: Request, response: Response):
     email = info.get('email')
     password = info.get('password')
 
+    if not (username and country and email and password):
+        return Protocol.Error.invalid_request
+
+    username = client.decrypt(username)
+    country = client.decrypt(country)
+    email = client.decrypt(email)
+    password = client.decrypt(password)
+
     print(
         f"username: {username}, country: {country}, email: {email}, password: {password}"
     )
 
-    if not (username and country and email and password):
-        return Protocol.Error.invalid_request
-
     sign_up_status = db.sign_up(username, country, email, password)
     if sign_up_status == Protocol.success:
-        client = handle_session(request, response)
         client.log_in(username)
         set_username_cookie(client, response)
 
