@@ -1,5 +1,5 @@
 import sys
-sys.path.append("..") # Adds higher directory to python modules path.
+sys.path.append("..")  # Adds higher directory to python modules path.
 
 from fastapi import APIRouter, Request, Response
 from protocol import Protocol
