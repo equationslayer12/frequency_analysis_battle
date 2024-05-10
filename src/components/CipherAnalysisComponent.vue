@@ -1,15 +1,13 @@
 <template>
-    <main class="mx-2xl flex flex-col items-center">
-    <ProgressBar :current="totalLettersGuessed" :end="cipheredLettersCount" class="mb-md"></ProgressBar>
-    <div id="textbox" class="mb-md max-w-race-width border-text-color border-2 border-opacity-20 rounded-xl bg-primary-color text-ignore-color shadow-lg shadow-slate-900">
+<div>
+    <div id="textbox" class="mb-md border-text-color border-2 border-opacity-20 rounded-xl bg-primary-color text-ignore-color shadow-lg shadow-slate-900">
         <Switch @toggle="hiddenModeActive = !hiddenModeActive" class="mt-md mb-lg"/>
-        <span id="text" class="mb-md mx-xl flex flex-wrap text-xl font-mono justify-between gap-x-2">
+        <span id="text" class="mb-md mx-xl flex flex-wrap text-xl font-mono justify-start gap-x-2">
             <span v-for="word in game.text.value.split(' ')">
-            <span v-for="letter in word">
-                <LetterComponent :letter="letter"/>
+                <span v-for="letter in word">
+                    <LetterComponent :letter="letter"/>
+                </span>
             </span>
-        </span>
-
         </span>
     </div>
 
@@ -20,7 +18,7 @@
     </div>
 
     <AnalysisTools/>
-    </main>
+</div>
 </template>
 
 <script setup lang="ts">
@@ -29,8 +27,7 @@
     import Switch from '@/components/Switch.vue'
     import AnalysisTools from '@/components/AnalysisTools.vue'
     import LetterComponent from '@/components/LetterComponent.vue'
-    import ProgressBar from '@/components/ProgressBar.vue'
-    import { game, totalLettersGuessed, cipheredLettersCount, selectedLetter, lettersState, hiddenModeActive } from '@/game/Game'
+    import { game, selectedLetter, lettersState, hiddenModeActive } from '@/game/Game'
     
     const emit = defineEmits(["letterChange"]);
     

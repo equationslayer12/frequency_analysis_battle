@@ -1,7 +1,7 @@
 from fastapi import APIRouter, WebSocket, Request, Response
 from starlette.websockets import WebSocketDisconnect
 from protocol import Protocol
-from client import Client
+from user.client_user import ClientUser
 from race_game import RaceGame
 from internals.session_utils import handle_session, handle_socket_session
 import sys
@@ -13,13 +13,14 @@ router = APIRouter()
 
 @router.get("/api/practice")
 def practice(request: Request, response: Response):
-    client = handle_session(request, response)
-    if not client.race_game:
-        client.start_game()
+    web_client = handle_session(request, response)
+    if not web_client.user:
+        game = RaceGame()
+        web_client.join_game(game)
 
     return {
-        "text": client.race_game.ciphered_text,
-        "cipheredLettersCount": client.race_game.chipered_letter_count
+        "text": web_client.race_game.ciphered_text,
+        "cipheredLettersCount": web_client.race_game.chipered_letter_count
     }
 
 
@@ -35,32 +36,33 @@ async def receive_practice_socket(websocket: WebSocket):
 async def practice_socket(websocket: WebSocket):
     await websocket.accept()
 
-    client = handle_socket_session(websocket)
-    if not client:
+    web_client = handle_socket_session(websocket)
+    if not web_client:
         print("client is none... why??")
         return None
-    client.socket = websocket
-    while client.socket:
-        request = await client.socket.receive_text()
-        response = handle_socket_request(client, request)
+    client_user = web_client.user
+
+    web_client.socket = websocket
+    while web_client.socket:
+        request = await web_client.socket.receive_text()
+        response = handle_socket_request(client_user, request)
         print("wow, response", response)
         if response:
             try:
-                await client.send_response(response)
+                await web_client.send_response(response)
             except TypeError:
                 return
             if response == Protocol.GAME_ENDED:
                 print("ended...")
-                client.end_game()
-                client.close_socket()
+                web_client.leave_game()
+                await web_client.close_socket()
                 return
 
 
-
-def handle_socket_request(client: Client, request: str) -> str:
+def handle_socket_request(client: ClientUser, request: str) -> str:
     """Get response to a websocket request.
     Side effects:
-        may change letters in client.race_game
+        may change letters in client.progress
         may end client.race_game
 
     Args:
@@ -81,19 +83,21 @@ def handle_socket_request(client: Client, request: str) -> str:
 
         from_letter, to_letter = args
         print(f"{client.username} | From {from_letter} to {to_letter}")
-        client.race_game.guess_letter(from_letter, to_letter)
+        client.progress.guess_letter(from_letter, to_letter)
 
-        if client.race_game.has_won():
+        if client.progress.has_won():
             response = Protocol.GAME_ENDED
         else:
             response = Protocol.Encrypt.change_letter(
-                client.race_game.get_gussed_count()
+                client.progress.get_gussed_count()
             )
 
     if command == Protocol.Command.new_text:
         print("new texting....")
-        client.end_game()
-        client.start_game()
+        client.leave_game()
+
+        game = RaceGame()
+        client.join_game(game)
         response = Protocol.GAME_ENDED
 
     return response

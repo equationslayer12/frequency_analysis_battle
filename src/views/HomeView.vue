@@ -3,6 +3,7 @@
     <h1 id="title" class="text-white text-8xl">SPAN RACER</h1>
   </div>
   <PinkButton draggable="false" href="/practice">Practice</PinkButton>
+  <PinkButton draggable="false" href="/race">Race</PinkButton>
   <button @click="test" class="bg-cyan-500 font-bold text-3xl rounded-md p-10">TEST: {{ counter }}</button>
 </template>
 

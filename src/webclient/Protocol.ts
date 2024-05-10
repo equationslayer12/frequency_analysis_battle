@@ -4,6 +4,7 @@ export default class Protocol {
     static success: string = "success";
     
     static Request = class {
+        static textLength = "len"; // request the text length
         static newText = "new";  // request a new text
         static changeLetter(originLetter: string, gussedLetter: string) {
             return `CL;${originLetter};${gussedLetter}`

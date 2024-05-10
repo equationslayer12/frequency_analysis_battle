@@ -27,6 +27,7 @@ class Game {
     }
     
     setText(text: string, cipheredLettersCount: number) {
+        text = text.toUpperCase();
         this.text.value = text;
         this.wordsArray = text.split(" ");
         this.cleanText = removePunc(text);

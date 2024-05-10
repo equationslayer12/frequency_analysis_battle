@@ -1,9 +1,9 @@
 <template>
 <div id="background" class="bg-gradient-to-b from-background-color to-black text-center flex flex-col items-center h-screen">
-    <h1 class="text-4xl font-semibold my-14 hover:scale-125 duration-150 text-text-color">Span Racer</h1>
+    <h1 class="my-xl text-4xl font-semibold hover:scale-125 duration-150 text-text-color">Span Racer</h1>
     <PinkButton v-if="gameFinished">Congratulations!</PinkButton>
-    <!-- try game.finished instead of gameFinished -->
-    <span v-if="game.text.value">
+    <span v-if="game.text.value" class="mx-2xl max-w-race-width md:w-race-width">
+        <ClientProgressBar class="mb-md"/>
         <CipherAnalysisComponent @letterChange="sendChangedLetter"/>
     </span>
     <span v-else>
@@ -14,7 +14,8 @@
 </template>
 
 <script setup lang="ts">
-    import { game, cipheredLettersCount, gameFinished, selectedLetter } from '@/game/Game';
+    import { game, gameFinished } from '@/game/Game';
+    import ClientProgressBar from '@/components/progress_bar/ClientProgressBar.vue';
     import CipherAnalysisComponent from '@/components/CipherAnalysisComponent.vue';
     import PinkButton from '@/components/pinkButton.vue'
     import Protocol from '@/webclient/Protocol'
@@ -43,7 +44,7 @@
     }
     async function connectToServerSocket() {
         console.log("start connecting")
-        socketClient.connectToServer();
+        await socketClient.connectToServer('/practice');
     }
     async function sendChangedLetter(originLetter: string, gussedLetter: string) {
         if (!socketClient.isConnected())

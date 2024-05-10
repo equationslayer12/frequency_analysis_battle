@@ -4,12 +4,15 @@ export default class SocketClient {
         this.socket = null;
     }
 
-    connectToServer() {
-        let ws = new WebSocket('ws://localhost:8080/api/practice')
-        ws.onopen = (event) => {
-            console.log("Connected to server socket");
-            this.socket = ws;
-        };
+    async connectToServer(url: string) {
+        return new Promise((resolve, reject) => {
+            let ws = new WebSocket('ws://localhost:8080/api' + url)
+            ws.onopen = (event) => {
+                console.log("Connected to server socket");
+                this.socket = ws;
+                resolve(ws);
+            };    
+        })
     }
     
     isConnected() {

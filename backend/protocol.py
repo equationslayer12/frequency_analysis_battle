@@ -35,6 +35,10 @@ class Protocol:
     class Command:
         change_letter = "CL"
         new_text = "new"
+
+    class Request:
+        text_length = "len"
+            
     class Error:
         empty_request = "ERR.EMPTY"
         invalid_request = "ERR.INVALID"

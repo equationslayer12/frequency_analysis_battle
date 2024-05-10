@@ -1,17 +1,18 @@
 <template>
 
 <span v-if="letter !== ' '" @mouseover="selectLetter()" @mouseleave="unselectLetter()">
-    <!-- letter isn't in alphabet -->
     <span v-if="!isAlphabet">{{ letter }} </span>  
+    <!-- letter isn't in alphabet -->
     
-    <!-- hidden mode is activated, display a * -->
     <span v-else-if="(!letterState.isGuessed) && hiddenModeActive" class="duration-300" :class="{'guessed': letterState.isGuessed, 'selected': letter == selectedLetter}">*</span>
-    <!--  -->
+    <!-- hidden mode is activated, display a * -->
+
     <span v-else class="duration-300" :class="{
         'guessed': letterState.isGuessed,
         'selected': letter == selectedLetter,
         'duplicate': isDuplicate(letter) && letterState.isGuessed
     }">{{ letterState.displayLetter }}</span>
+    <!-- alphabet letter -->
 </span>
 
 </template>

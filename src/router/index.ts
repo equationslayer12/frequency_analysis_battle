@@ -1,7 +1,8 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-import PracticeView from '../views/PracticeView.vue'
-import TestView from '../views/testView.vue'
+import HomeView from '@/views/HomeView.vue'
+import PracticeView from '@/views/PracticeView.vue'
+import TestView from '@/views/testView.vue'
+import RaceView from '@/views/RaceView.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -13,6 +14,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/practice',
     name: 'practice',
     component: PracticeView
+  },
+  {
+    path: '/race',
+    name: 'race',
+    component: RaceView
   },
   {
     path: '/test',

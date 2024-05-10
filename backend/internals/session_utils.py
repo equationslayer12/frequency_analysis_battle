@@ -1,16 +1,16 @@
+from typing import Tuple
+from fastapi import Request, Response
+from .http_session import HTTPSession
+from web_client import WebClient
 import sys
 sys.path.append("..")  # Adds higher directory to python modules path.
 
-from client import Client
-from .http_session import HTTPSession
-from fastapi import Request, Response
-from typing import Tuple
 
 clients: dict = {}
 
 
-def handle_socket_session(websocket) -> Client:
-    client: Client | None = None
+def handle_socket_session(websocket) -> WebClient:
+    client: WebClient | None = None
     session_cookie = websocket.cookies.get('session')
     print(f"socket session cookie: {session_cookie}")
     if session_cookie is None:
@@ -26,7 +26,7 @@ def handle_socket_session(websocket) -> Client:
     return client
 
 
-def handle_session(request: Request, response: Response) -> Client:
+def handle_session(request: Request, response: Response) -> WebClient:
     """If a request contains cookies, extract the client from it.
     if it doesn't, create a client and a cookie and attach it to response.
 
@@ -37,7 +37,7 @@ def handle_session(request: Request, response: Response) -> Client:
     Returns:
         Client: _description_
     """
-    client: Client | None = None
+    client: WebClient | None = None
 
     session_cookie = request.cookies.get('session')
     username_cookie = request.cookies.get('username')
@@ -55,17 +55,19 @@ def handle_session(request: Request, response: Response) -> Client:
             key=HTTPSession._generate_session_key(),
             expire=None,
         )
-        client = Client(new_session)
+        client = WebClient(new_session)
         clients[new_session.key] = client
 
         new_session.set_username(client.username)
 
         response.set_cookie(key="session", value=new_session.encrypt_session())
-        response.set_cookie(key="username", value=new_session.encrypt_username())
+        response.set_cookie(
+            key="username", value=new_session.encrypt_username())
         print(f"created {client.username}, with key={client.session.key}")
     return client
 
-def set_username_cookie(client: Client, response: Response):
+
+def set_username_cookie(client: WebClient, response: Response):
     if client is None:
         return
     session = client.session
@@ -74,13 +76,14 @@ def set_username_cookie(client: Client, response: Response):
     client.session.set_username(client.username)
     response.set_cookie(key="username", value=session.encrypt_username())
 
-def attempt_session_login(session_cookie: str) -> Client:
+
+def attempt_session_login(session_cookie: str) -> WebClient:
     session = HTTPSession.decrypt_session(session_cookie)
     client = clients.get(session.key)
 
     if not client:
         return None
-    
+
     return client
 
 

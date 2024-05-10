@@ -1,7 +1,6 @@
 import HTTPClient from "./HTTPClient";
-import SessionHandle from "./Sessions/SessionHandle";
 import SocketClient from "./SocketClient";
-import {Secure} from "./Secure";
+import { Secure } from "./Secure";
 
 const secure = new Secure();
 await secure.handshake();
