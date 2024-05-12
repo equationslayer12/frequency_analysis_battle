@@ -4,7 +4,7 @@
  -->
 <template>
     <div>
-        <ProgressBar class="bg-accent-color" :username="username" :current="totalLettersGuessed" :end="cipheredLettersCount"/>
+        <ProgressBar class="bg-guessed-color" :username="username" :current="totalLettersGuessed" :end="cipheredLettersCount"/>
     </div>
 </template>
 

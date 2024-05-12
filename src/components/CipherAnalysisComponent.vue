@@ -71,7 +71,7 @@
 
 <style>
     .guessed {
-        @apply text-green-500 font-semibold;
+        @apply text-guessed-color font-semibold;
     }
 
     .duplicate {

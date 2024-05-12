@@ -12,7 +12,8 @@ module.exports = {
         'accent-color': '#EC4899',
         'hover-accent-color': '#F01883',
         'ignore-color': '#919191',
-        'evil-color': '#b80000'
+        'evil-color': '#b80000',
+        'guessed-color': '#22c55e'
       },
       spacing: {  // the lift-kit system https://youtu.be/9ElrcTtAxzA?si=qzYS4UmFXXpGPXm-&t=253
         'xs': '0.128em',
