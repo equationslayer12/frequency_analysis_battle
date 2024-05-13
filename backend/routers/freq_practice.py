@@ -42,7 +42,6 @@ async def practice_socket(websocket: WebSocket):
         return None
     client_user = web_client.user
 
-    web_client.socket = websocket
     while web_client.socket:
         request = await web_client.socket.receive_text()
         response = handle_socket_request(client_user, request)

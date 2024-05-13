@@ -23,6 +23,7 @@ def handle_socket_session(websocket) -> WebClient:
     print(f"client: {client}")
     # print(f"ladies and gentleman client {client.nickname} connected!")
 
+    client.socket = websocket
     return client
 
 

@@ -16,9 +16,15 @@ class WebClient:
         self.race_game: RaceGame = None
 
     def join_game(self, game: RaceGame):
-        self.create_user()
-        self.user.join_game(game)
         self.race_game = game
+
+        # Create a user (a player in a game)
+        self.create_user()
+        # Add it to the game
+        self.race_game.add_user(self.user)
+        # Join it
+        self.user.join_game(game)
+
 
     def leave_game(self):
         self.user.leave_game()

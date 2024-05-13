@@ -22,26 +22,39 @@ def find_a_game_for_client(web_client: WebClient) -> RaceGame:
         new_game = RaceGame()
         queuing_games.append(new_game)
 
-    return matched_game[-1]
+    matched_game = queuing_games[-1]
+    return matched_game
 
 
 @router.websocket("/api/race/join")
 async def join_race_game(websocket: WebSocket):
     try:
         await websocket.accept()
-        client = handle_socket_session(websocket)
-        game = find_a_game_for_client(client)
+        web_client = handle_socket_session(websocket)
+        game = find_a_game_for_client(web_client)
+        connected_usernames = game.get_usernames()
+        print(f"paired client {web_client.username} with text:\n{game.ciphered_text}")
         if game:
-            client.start_game(game)
-            game.add_player(client)
-            await client_racing(client)
+            web_client.join_game(game)
+            print(f"game now contains {len(game.users)} users: {game.users}")
+            await client_racing(web_client, connected_usernames)
 
-            print(client.username, "is guest:", client.is_guest)
+            print(web_client.username, "is logged in:", not web_client.is_guest)
 
     except WebSocketDisconnect:
         print("Client disconnected")
+        web_client.leave_game()
         return Protocol.Error.invalid_request
 
 
-async def client_racing(client: WebClient):
-    ...
+async def client_racing(client: WebClient, opponents):
+    """Client joined a race game against other players. this function handles the socket
+
+    Args:
+        client (WebClient): client
+    """
+    # send initial information: usernames.
+    # equationslayer12 donde pablo
+    print("clienting socketing:", client.socket)
+    await client.send_response("hi")
+

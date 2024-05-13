@@ -11,7 +11,7 @@ class ClientUser(User):
     def join_game(self, game: RaceGame):
         self.race_game = game
         self.progress = TextProgress(game.decipher_dictionary)
-    
+
     def leave_game(self):
         self.race_game = None
         self.progress = None
