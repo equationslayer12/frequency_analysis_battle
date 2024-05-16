@@ -21,7 +21,7 @@ export default class SocketClient {
 
     async sendAndReceive(request: string): Promise<string> {        
         return new Promise((resolve, reject) => {
-            if (this.socket == null) {
+            if (!this.socket) {
                 reject();
                 return
             }
@@ -34,6 +34,19 @@ export default class SocketClient {
 
     async send(request: string) {
         this.socket?.send(request);
+    }
+
+    async receive() {
+        return new Promise((resolve, reject) => {
+            if (!this.socket) {
+                reject();
+                return
+            }
+
+            this.socket.onmessage = (response) => {
+                resolve(response.data);
+            };
+        })
     }
 
     async disconnect() {
