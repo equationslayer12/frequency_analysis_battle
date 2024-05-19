@@ -1,20 +1,19 @@
 <!-- 
     A regular progress bar, but with Evil color.
-    takes in the current value (Number), and the end goal value (Number).
-    current / end
+    takes in the opponent player
  -->
 <template>
     <div>
-        <ProgressBar class="bg-evil-color" :current="current" :end="end"/>
+        <ProgressBar class="bg-evil-color" :username="opponent?.username" :current="opponent?.progress?.current" :end="opponent?.progress?.end"/>
     </div>
 </template>
 
 <script setup>
+import { Player } from '@/user/OpponentPlayer';
 import ProgressBar from './ProgressBar.vue';
 
 const props = defineProps({
-    current: Number,
-    end: Number
+    opponent: Player
 });
 
 </script>

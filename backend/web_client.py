@@ -1,41 +1,43 @@
-import random
+import asyncio
 from backend.internals.encryption.aes import AESCipher
+import random
 from internals.http_session import HTTPSession
-from fastapi import WebSocket
-from user.client_user import ClientUser
-from race_game import RaceGame
+from fastapi import WebSocket, WebSocketDisconnect
+from backend.player.player import Player
+from backend.text_info import TextInfo
+from constants import UID_LENGTH
+
 
 class WebClient:
     def __init__(self, session: HTTPSession) -> None:
         self.is_guest = True
-        self.session: HTTPSession = session
         self.username: str = "Guest"
+        self.user_id: int = self.generate_random_uid()  # per sesion
+        self.session: HTTPSession = session
         self.socket: WebSocket = None
         self.AESC: AESCipher = None
-        self.user: ClientUser = None
-        self.race_game: RaceGame = None
+        self.player: Player = None
+        self.text_info: TextInfo = None
 
-    def join_game(self, game: RaceGame):
-        self.race_game = game
+        self.lock = asyncio.Lock()
+
+    def join_game(self, text_info: TextInfo):
+        self.text_info = text_info
 
         # Create a user (a player in a game)
-        self.create_user()
-        # Add it to the game
-        self.race_game.add_user(self.user)
+        self.create_player()
         # Join it
-        self.user.join_game(game)
-
+        self.player.join_game(text_info)
 
     def leave_game(self):
-        self.user.leave_game()
-        self.user = None
-        self.race_game = None
+        self.player.leave_game()
+        self.player = None
+        self.text_info = None
 
-
-    def create_user(self):
+    def create_player(self):
         """Create a user to join a game.
         """
-        self.user = ClientUser(self.username)
+        self.player = Player(self.username)
 
     def set_aes_key(self, aes_key: str):
         self.AESC: AESCipher = AESCipher(key=aes_key)
@@ -54,7 +56,10 @@ class WebClient:
         self.is_guest = False
         self.username = username
 
-    async def send_response(self, message: str):
+    def generate_random_uid(self):
+        return int.from_bytes(random.randbytes(UID_LENGTH), byteorder='little')
+
+    async def send_socket_response(self, message: str):
         """Send a message to the client through the client-server websocket.
 
         Args:
@@ -63,10 +68,18 @@ class WebClient:
         Raises:
             TypeError: socket is closed
         """
-        if self.socket:
-            await self.socket.send_text(message)
-        else:
-            raise TypeError("Socket is closed")
+        async with self.lock:
+            if self.socket:
+                await self.socket.send_text(message)
+            else:
+                raise WebSocketDisconnect
+
+    async def receive_socket_request(self) -> str:
+        async with self.lock:
+            if self.socket:
+                return await self.socket.receive_text()
+            else:
+                raise WebSocketDisconnect
 
     async def close_socket(self):
         """close the client-server websocket"""

@@ -1,5 +1,8 @@
 import { ref, Ref } from "vue";
 
+/**
+ * Signed up / guest user. 
+ */
 export default abstract class User {
     isGuest: boolean
     username: Ref<string>

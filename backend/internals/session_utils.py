@@ -12,16 +12,12 @@ clients: dict = {}
 def handle_socket_session(websocket) -> WebClient:
     client: WebClient | None = None
     session_cookie = websocket.cookies.get('session')
-    print(f"socket session cookie: {session_cookie}")
     if session_cookie is None:
         return None
     session = HTTPSession.decrypt_session(session_cookie)
     if not session:
         return None
-    print("the key", session.key)
     client = clients.get(session.key)
-    print(f"client: {client}")
-    # print(f"ladies and gentleman client {client.nickname} connected!")
 
     client.socket = websocket
     return client

@@ -3,13 +3,33 @@ export default class Protocol {
     static GAME_ENDED: string = "end";
     static success: string = "success";
     
+    static SPLIT = ";";
+
     static Request = class {
         static textLength = "len"; // request the text length
         static newText = "new";  // request a new text
         static changeLetter(originLetter: string, gussedLetter: string) {
-            return `CL;${originLetter};${gussedLetter}`
+            return `CL${Protocol.SPLIT}${originLetter}${Protocol.SPLIT}${gussedLetter}`
         }
     };
+
+    static Response = class {
+        static splitResponse(response: string): string[] {
+            return response.split(Protocol.SPLIT)
+        }
+
+        static textLength(response: string): number {
+            return parseInt(response);
+        }
+
+        static Event = class {
+            static UpdateExistingPlayers = "UEP";
+            static PlayerJoined = "PJ";
+            static PlayerLeft = "PL";
+            static GameIsStarting = "GIS";
+            static StartCountdown = "SC";
+        }
+    }
 
     static Sessions = class {
         static decryptUsername(username: string) {

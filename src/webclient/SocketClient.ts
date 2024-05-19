@@ -36,7 +36,7 @@ export default class SocketClient {
         this.socket?.send(request);
     }
 
-    async receive() {
+    async receive(): Promise<string> {
         return new Promise((resolve, reject) => {
             if (!this.socket) {
                 reject();

@@ -2,11 +2,28 @@ class Protocol:
     success = "success"
     DELETE_CHAR = "del"
     GAME_ENDED = "end"
+
+    SPLIT = ";"
     
     class Encrypt:
+        class Event:
+            @staticmethod
+            def player_joined(username: str):
+                return Protocol.Encrypt.combine("PJ", username)
+            
+            START_COUNTDOWN = "SC"
+
         @staticmethod
         def combine(*args):
-            return ";".join(args)
+            return Protocol.SPLIT.join(args)
+
+        @staticmethod
+        def opponents(opponents: list):
+            return Protocol.Encrypt.combine("UEP", *opponents)
+
+        @staticmethod
+        def text_length(text_length: int):
+            return str(text_length)
 
         @staticmethod
         def change_letter(score: int) -> str:

@@ -1,6 +1,6 @@
+import { QUEUE, ONGOING, ENDED, COUNTDOWN } from "@/Constants";
 import TextState from "./TextState";
-import { defaultUsername } from "@/Constants";
-import clientUser from "@/user/ClientUser";
+import { OpponentUser } from "@/user/OpponentUser";
 import { ref, Ref } from "vue";
 
 
@@ -15,24 +15,53 @@ class Game {
     cipheredLettersCount: Ref<number>
     text: Ref<string>;
     cleanText: string;
-    wordsArray: string[]
-    isFinished: Ref<boolean>
+    wordsArray: string[];
+    status: Ref<string>;
+    opponents: Ref<{[key: string]: OpponentUser}>;  // {username: OpponentUser}
+
     constructor() {
         this.textState = new TextState();
         this.cipheredLettersCount = ref(0);  // the amount of letters that are ciphered, the rest are not in the text.    
         this.text = ref('');
         this.cleanText = '';  // text without punctuation
         this.wordsArray = [];
-        this.isFinished = ref(false);
+        this.status = ref(QUEUE)
+        this.opponents = ref({});
     }
     
+    setTextLength(cipheredLettersCount: number) {
+        this.cipheredLettersCount.value = cipheredLettersCount
+    }
+
     setText(text: string, cipheredLettersCount: number) {
         text = text.toUpperCase();
         this.text.value = text;
         this.wordsArray = text.split(" ");
         this.cleanText = removePunc(text);
 
-        this.cipheredLettersCount.value = cipheredLettersCount
+        this.cipheredLettersCount.value = cipheredLettersCount;
+    }
+
+    createOpponent(username: string) {
+        const newOpponent = new OpponentUser(username);
+        newOpponent.joinGame()
+        this.opponents.value[username] = newOpponent;
+    }
+
+    removeOpponent(username: string) {
+        delete this.opponents.value[username];
+    }
+
+    /**
+     * Sleeps for a couple of seconds, while setting the status to COUNTDOWN.
+     */
+    async startCountdown() {
+        this.status.value = COUNTDOWN;
+        // await this.sleep(3000);  // sleep for 3000ms = 3 seconds
+
+    }
+    start() {
+        this.status.value = ONGOING;
     }
 
     changeLetter(fromLetter: string, toLetter: string) {
@@ -63,11 +92,12 @@ class Game {
     }
 
     endGame() {
-        this.isFinished.value = true;
+        this.status.value = ENDED;
         this.textState.totalLettersGuessed.value = this.cipheredLettersCount.value
     }
+
     reset() {
-        this.isFinished.value = false;
+        this.status.value = QUEUE;
         this.setText("", 0)
         this.textState.reset();
     }
@@ -82,6 +112,7 @@ export let totalLettersGuessed = game.textState.totalLettersGuessed;
 export let selectLetter = game.textState.selectLetter;
 export let unselectLetter = game.textState.unselectLetter;
 export let isLetter = game.textState.isLetter;
+export let opponents = game.opponents;
 
 export let cipheredLettersCount = game.cipheredLettersCount;  // the amount of letters that are ciphered, the rest are not in the text.    
-export let gameFinished = game.isFinished;
+export let gameStatus = game.status;

@@ -15,12 +15,12 @@ class HTTPSession:
 
     def set_username(self, username: str):
         self.username = username
-    
+
     def encrypt_session(self):
         return base64.b64encode(
             ('{"key": "' + self.key + '"}').encode()
         ).decode()
-    
+
     @classmethod
     def decrypt_session(cls, session_cookie: str) -> 'HTTPSession':
         try:
