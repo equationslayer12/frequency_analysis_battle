@@ -5,7 +5,7 @@
 
 <style>
 body {
-  @apply bg-gradient-to-b text-center flex justify-center h-screen;
+  @apply bg-gradient-to-b h-screen;
   background: 
               /* radial-gradient(50vh circle at 50% 0px, rgb(0, 72, 83), transparent), */
               linear-gradient(to bottom, theme('colors.background-color') 30%, black)

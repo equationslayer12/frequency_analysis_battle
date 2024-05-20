@@ -23,6 +23,8 @@ module.exports = {
         'xl': '1.618em',
         '2xl': '2.618em',
         'race-width': '45em',
+        'lg-card-width': '45em',
+        'sm-card-width' : '30em',
       },
     },
   },

@@ -1,9 +1,22 @@
 <template>
-  <div id="top" @mousemove="setTopSpotlightPosition" class="relative bg-primary-color h-96 w-full flex flex-col justify-center items-center overflow-hidden rounded-b-full shadow-lg shadow-black border-solid">
+  <!-- <div id="top" @mousemove="setTopSpotlightPosition" class="relative bg-primary-color h-96 w-full flex flex-col justify-center items-center overflow-hidden rounded-b-full shadow-lg shadow-black border-solid">
     <h1 id="title" class="text-white text-8xl">SPAN RACER</h1>
+  </div> -->
+  <h1 class="mb-5">SPAN RACER</h1>
+  <div class="mb-xl max-w-2xl bg-primary-color p-lg text-xl flex justify-between rounded-md shadow-md shadow-accent-color">
+    <span class="flex flex-col">
+      <span class="text-text-color text-2xl font-bold">MULTIPLAYER</span>
+      <span class="text-text-color">Race against others to see who can decipher faster!</span>
+    </span>
+    <PinkButton draggable="false" href="/race" class="ml-xl">Race</PinkButton>
   </div>
-  <PinkButton draggable="false" href="/practice">Practice</PinkButton>
-  <PinkButton draggable="false" href="/race">Race</PinkButton>
+  <div class="mb-xl max-w-2xl bg-primary-color p-lg text-xl flex justify-between rounded-md shadow-md shadow-accent-color">
+    <span class="flex flex-col">
+      <span class="text-text-color text-2xl font-bold">PRACTICE MODE</span>
+      <span class="text-text-color">Practice deciphering to become faster!</span>
+    </span>
+    <PinkButton draggable="false" href="/practice">Practice</PinkButton>
+  </div>
   <button @click="test" class="bg-cyan-500 font-bold text-3xl rounded-md p-10">TEST: {{ counter }}</button>
 </template>
 
