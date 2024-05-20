@@ -1,4 +1,4 @@
-import { QUEUE, ONGOING, ENDED, COUNTDOWN } from "@/Constants";
+import { QUEUE, ONGOING, ENDED, COUNTDOWN, COUNTDOWN_TIME } from "@/Constants";
 import TextState from "./TextState";
 import { OpponentUser } from "@/user/OpponentUser";
 import { ref, Ref } from "vue";
@@ -57,11 +57,20 @@ class Game {
      */
     async startCountdown() {
         this.status.value = COUNTDOWN;
-        // await this.sleep(3000);  // sleep for 3000ms = 3 seconds
-
+        return this.sleep(COUNTDOWN_TIME * 1000)  // this.sleep takes ms, and countdown time is in seconds.
     }
+
+    /**
+     * delay.
+     * @param ms milliseconds to delay
+     */
+    async sleep(ms: number) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
     start() {
         this.status.value = ONGOING;
+        this.textState.reset();
     }
 
     changeLetter(fromLetter: string, toLetter: string) {

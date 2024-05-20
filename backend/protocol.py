@@ -4,13 +4,13 @@ class Protocol:
     GAME_ENDED = "end"
 
     SPLIT = ";"
-    
+
     class Encrypt:
         class Event:
             @staticmethod
             def player_joined(username: str):
                 return Protocol.Encrypt.combine("PJ", username)
-            
+
             START_COUNTDOWN = "SC"
 
         @staticmethod
@@ -48,18 +48,20 @@ class Protocol:
                 return None
             from_letter, to_letter = fields
             return from_letter, to_letter
-    
+
     class Command:
         change_letter = "CL"
         new_text = "new"
 
     class Request:
         text_length = "len"
-            
+        text = "text"
+
     class Error:
         empty_request = "ERR.EMPTY"
         invalid_request = "ERR.INVALID"
         user_already_exists = "ERR.USER_ALREADY_EXISTS"
+        not_in_game = "ERR.NOT_IN_GAME"
 
 
 if __name__ == '__main__':

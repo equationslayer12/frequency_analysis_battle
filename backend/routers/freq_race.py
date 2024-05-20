@@ -1,7 +1,7 @@
 import asyncio
 import time
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from backend.constants import QUEUE
+from fastapi import APIRouter, Request, Response, WebSocket, WebSocketDisconnect
+from backend.constants import COUNTDOWN, ONGOING, QUEUE
 from internals.session_utils import handle_session, handle_socket_session
 from protocol import Protocol
 from web_client import WebClient
@@ -49,48 +49,47 @@ async def join_race_game(websocket: WebSocket):
         return None
 
     lobby: WebLobby = find_a_lobby_for_client(web_client)
+
     text_info: TextInfo = lobby.text_info
-    text_length_response = Protocol.Encrypt.text_length(text_info.ciphered_letter_count)
+    text_length_response = Protocol.Encrypt.text_length(
+        text_info.ciphered_letter_count)
     await web_client.send_socket_response(text_length_response)
+
     ack = await web_client.receive_socket_request()
-    print("acking:", ack)
+
     opponents = lobby.get_usernames(not_including=web_client)
     await web_client.send_socket_response(Protocol.Encrypt.opponents(opponents))
 
     print(lobby.clients)
     if not lobby.contains_user_id(web_client.user_id):
-        print("adding...")
-        await lobby.add_client(web_client)
-        print("added! :)")
+        info = Protocol.Encrypt.Event.player_joined(web_client.username)
+        await lobby.notify_all(info)
+
+        await lobby.add_client(web_client)  # may trigger countdown
+
     else:
-        print("already connected :)")
         ...  # already connected
 
     print(
         f"paired client {web_client.username} with text:\n{lobby.text_info.ciphered_text}")
 
     web_client.join_game(text_info)
-    print(f"game now contains {len(lobby.clients)} clients: {lobby.clients}")
-    
-    if 1: 
+    # print(f"game now contains {len(lobby.clients)} clients: {lobby.clients}")
+
+    if 0:
         try:
             for i in range(100):
                 await web_client.send_socket_response("heartbeat")
-                await asyncio.sleep(2)
+                await asyncio.sleep(3)
         except Exception as e:
             print(e)
             print("DONE! QUITTING!!!!!!!!!!!!!!!!!!!")
 
     print(web_client.username, "is logged in:", not web_client.is_guest)
 
-    await queue_client(lobby, web_client)
+    print("waiting until countdown starts")
+    await lobby.wait_for_countdown()
     await client_racing(lobby, web_client)
-
-
-async def queue_client(lobby: WebLobby, web_client: WebClient):
-    text_info = web_client.text_info
-    # while lobby.status == QUEUE:
-    #     request = await web_client.receive_socket_request()
 
 
 async def client_racing(lobby: WebLobby, client: WebClient):
@@ -101,5 +100,12 @@ async def client_racing(lobby: WebLobby, client: WebClient):
     """
     # send initial information: usernames.
     # equationslayer12 donde pablo
-    print("clienting socketing:", client.socket)
-    await client.send_socket_response("hi")
+    text_info = lobby.text_info
+    print("started a race for:", client.socket)
+    print(lobby.status)
+    while lobby.status == ONGOING or lobby.status == COUNTDOWN:
+        print("clienting asking...")
+        request = await client.receive_socket_request()
+        print(client.username, "asked for", request)
+        if request == Protocol.Request.text:
+            await client.send_socket_response(text_info.ciphered_text)

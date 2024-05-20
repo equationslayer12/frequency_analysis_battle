@@ -8,6 +8,7 @@ export default class Protocol {
     static Request = class {
         static textLength = "len"; // request the text length
         static newText = "new";  // request a new text
+        static text = "text";  // request the text in a multiplayer lobby
         static changeLetter(originLetter: string, gussedLetter: string) {
             return `CL${Protocol.SPLIT}${originLetter}${Protocol.SPLIT}${gussedLetter}`
         }
@@ -26,7 +27,6 @@ export default class Protocol {
             static UpdateExistingPlayers = "UEP";
             static PlayerJoined = "PJ";
             static PlayerLeft = "PL";
-            static GameIsStarting = "GIS";
             static StartCountdown = "SC";
         }
     }

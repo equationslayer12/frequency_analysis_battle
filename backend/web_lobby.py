@@ -1,5 +1,6 @@
 import asyncio
 import threading
+import time
 from web_client import WebClient
 from text_info import TextInfo
 from protocol import Protocol
@@ -12,6 +13,7 @@ class WebLobby:
         self.clients: Dict[int, WebClient] = {}
         self.text_info = TextInfo()
         self.status = QUEUE
+        self._countdown_event = asyncio.Event()
 
     async def notify_all(self, info: str):
         """send information to all clients' sockets inside the lobby
@@ -26,27 +28,48 @@ class WebLobby:
             await web_client.send_socket_response(info)
 
     async def start_countdown(self):
-        print("its the final countdown")
+        """Sets self.status to countdown, sleeps, then selts. self.status to ongoing.
+
+        Returns:
+            Promise: a promise to the countdown
+        """
+        print("-=-=- its the final countdown -=-=-")
         self.status = COUNTDOWN
-        await self.notify_all(Protocol.Encrypt.Event.START_COUNTDOWN)
+
+        self._countdown_event.set()  # set countdown event to start.
+
         await asyncio.sleep(COUNTDOWN_SECONDS)
         self.status = ONGOING
 
+    async def wait_for_countdown(self):
+        if self.status != QUEUE:
+            print("no, isn't queue. started already.")
+            return
+
+        await self._countdown_event.wait()
+
     async def add_client(self, client: WebClient) -> bool:
+        """Adds a client to the lobby.
+        Might trigger countdown before game starts.
+
+        Args:
+            client (WebClient): client
+
+        Returns:
+            bool: success
+        """
         if not client:
             return False
         if client.user_id in self.clients:
             return False
 
-        info = Protocol.Encrypt.Event.player_joined(client.username)
-        await self.notify_all(info)
-
         self.clients[client.user_id] = client
 
-        if len(self.clients) >= CLIENT_THRESHOLD:
-            print("its is!!")
-            thread = threading.Thread(target=asyncio.run, args=(self.start_countdown()))
-            thread.start()
+        should_start_countdown = len(self.clients) >= CLIENT_THRESHOLD
+        print("should start:", should_start_countdown)
+        if should_start_countdown:
+            await self.notify_all(Protocol.Encrypt.Event.START_COUNTDOWN)
+            await self.start_countdown()
 
         return True
 
