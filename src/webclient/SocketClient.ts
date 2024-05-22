@@ -1,7 +1,9 @@
 export default class SocketClient {
     socket: WebSocket | null;
+    lock: AsyncLock
     constructor() {
         this.socket = null;
+        this.lock = new AsyncLock();
     }
 
     async connectToServer(url: string) {
