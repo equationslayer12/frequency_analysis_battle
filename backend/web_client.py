@@ -1,6 +1,6 @@
 import asyncio
 from backend.internals.encryption.aes import AESCipher
-import random
+from backend.utils.random_utils import rand_bytes
 from internals.http_session import HTTPSession
 from fastapi import WebSocket, WebSocketDisconnect
 from backend.player.player import Player
@@ -60,7 +60,7 @@ class WebClient:
         self.username = username
 
     def generate_random_uid(self):
-        return int.from_bytes(random.randbytes(UID_LENGTH), byteorder='little')
+        return rand_bytes(UID_LENGTH)
 
     async def send_socket_response(self, message: str):
         """Send a message to the client through the client-server websocket.

@@ -9,26 +9,13 @@ from web_client import WebClient
 from web_lobby import WebLobby
 from backend.text_info import TextInfo
 from typing import List
+from lobby_handler import LobbyHandler
 
 router = APIRouter()
 
-queuing_lobbies: List[WebLobby] = []
-ongoing_lobbies: List[WebLobby] = []
+lobby_handler = LobbyHandler()
 
 
-def find_a_lobby_for_client(web_client: WebClient) -> TextInfo:
-    """Search for games in queuing_games, if empty create one.
-    Args:
-        client (Client): the client that wants to join a game.
-    Returns:
-        Game: matched game for client.
-    """
-    if len(queuing_lobbies) == 0:
-        new_lobby = WebLobby()
-        queuing_lobbies.append(new_lobby)
-
-    lobby = queuing_lobbies[-1]
-    return lobby
 
 
 @router.websocket("/api/race/join")
@@ -49,7 +36,7 @@ async def join_race_game(websocket: WebSocket):
         print("client is none... why??")
         return None
 
-    lobby: WebLobby = find_a_lobby_for_client(web_client)
+    lobby: WebLobby = lobby_handler.find_lobby_for_client(web_client)
 
     text_info: TextInfo = lobby.text_info
     text_length_response = Protocol.Encrypt.text_length(
@@ -69,7 +56,7 @@ async def join_race_game(websocket: WebSocket):
             web_client.username, web_client.user_id)
         await lobby.notify_all(info)
 
-        await lobby.add_client(web_client)  # may trigger countdown
+        await lobby_handler.add_client(lobby, web_client)
 
     else:
         ...  # already connected

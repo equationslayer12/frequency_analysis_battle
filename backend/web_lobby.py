@@ -1,6 +1,4 @@
 import asyncio
-import threading
-import time
 from web_client import WebClient
 from text_info import TextInfo
 from protocol import Protocol
@@ -9,12 +7,13 @@ from constants import COUNTDOWN_SECONDS, CLIENT_THRESHOLD, QUEUE, COUNTDOWN, ONG
 
 
 class WebLobby:
-    def __init__(self) -> None:
+    def __init__(self, lobby_id) -> None:
         self.clients: Dict[int, WebClient] = {}
         self._clients_finished_count = 0
         self.text_info = TextInfo()
         self.status = QUEUE
         self._countdown_event = asyncio.Event()
+        self.lobby_id = lobby_id
 
     async def notify_all(self, info: str, not_including=None):
         """send information to all clients' sockets inside the lobby
@@ -44,8 +43,6 @@ class WebLobby:
         await asyncio.sleep(COUNTDOWN_SECONDS)
         self.status = ONGOING
 
-        self.time_limit()
-
     async def wait_for_countdown(self):
         if self.status != QUEUE:
             print("no, isn't queue. started already.")
@@ -55,7 +52,6 @@ class WebLobby:
 
     async def add_client(self, client: WebClient) -> bool:
         """Adds a client to the lobby.
-        Might trigger countdown before game starts.
 
         Args:
             client (WebClient): client
@@ -69,13 +65,6 @@ class WebLobby:
             return False
 
         self.clients[client.user_id] = client
-
-        should_start_countdown = len(self.clients) >= CLIENT_THRESHOLD
-        print("should start:", should_start_countdown)
-        if should_start_countdown:
-            await self.notify_all(Protocol.Encrypt.Event.START_COUNTDOWN)
-            await self.start_countdown()
-
         return True
 
     def remove_client(self, client: WebClient) -> bool:
@@ -89,19 +78,24 @@ class WebLobby:
 
     def end_game(self):
         self.status = ENDED
+    
+    async def close(self):
+        self.text_info.end()
+        self.text_info = None
+        await self.disconnect_all_clients()
+
+        self.clients = None
+
+    async def disconnect_all_clients(self):
+        for client_id, web_client in self.clients.items():
+            web_client.leave_game()
+            web_client.leave_game()
+            await web_client.close_socket()
 
     def client_fished(self):
         self._clients_finished_count += 1
         if self._clients_finished_count == len(self.clients):
             self.end_game()
-
-    async def time_limit(self):
-        time.sleep(TIME_LIMIT)
-        self.end_game()
-        print("ended...")
-        for web_client in self.clients.values():
-            web_client.leave_game()
-            await web_client.close_socket()
 
     def get_status(self):
         return self.status
