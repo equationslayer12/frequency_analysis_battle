@@ -3,7 +3,7 @@
  * that a particular piece of code is only executed by one async operation at a time,
  * preventing race conditions and ensuring sequential execution of critical sections.
  */
-class AsyncLock {
+export class AsyncLock {
     private queue: (() => void)[] = [];
     private isLocked: boolean = false;
 

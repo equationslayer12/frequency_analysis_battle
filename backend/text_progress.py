@@ -5,6 +5,7 @@ class TextProgress:
     """
     Client text progress. tracks which letters have been guessed, and how many of them are correct.
     """
+
     def __init__(self, decipher_dictionary: dict) -> None:
         self.guessed = {}
         self.guessed_correctly = 0
@@ -72,8 +73,8 @@ class TextProgress:
             return False
 
         return real_letter == to_letter
-
-    def has_won(self) -> bool:
+    
+    def has_finished(self) -> bool:
         """is the game over
 
         Returns:

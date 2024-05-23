@@ -2,6 +2,7 @@ import asyncio
 import time
 from fastapi import APIRouter, Request, Response, WebSocket, WebSocketDisconnect
 from backend.constants import COUNTDOWN, ONGOING, QUEUE
+from backend.player.player import Player
 from internals.session_utils import handle_session, handle_socket_session
 from protocol import Protocol
 from web_client import WebClient
@@ -57,12 +58,15 @@ async def join_race_game(websocket: WebSocket):
 
     ack = await web_client.receive_socket_request()
 
-    opponents = lobby.get_usernames(not_including=web_client)
-    await web_client.send_socket_response(Protocol.Encrypt.opponents(opponents))
+    opponents_usernames = lobby.get_usernames(not_including=web_client)
+    opponents_user_ids = lobby.get_user_ids(
+        not_including_id=web_client.user_id)
+    await web_client.send_socket_response(Protocol.Encrypt.opponents(opponents_usernames, opponents_user_ids))
 
     print(lobby.clients)
     if not lobby.contains_user_id(web_client.user_id):
-        info = Protocol.Encrypt.Event.player_joined(web_client.username)
+        info = Protocol.Encrypt.Event.player_joined(
+            web_client.username, web_client.user_id)
         await lobby.notify_all(info)
 
         await lobby.add_client(web_client)  # may trigger countdown
@@ -71,7 +75,8 @@ async def join_race_game(websocket: WebSocket):
         ...  # already connected
 
     print(
-        f"paired client {web_client.username} with text:\n{lobby.text_info.ciphered_text}")
+        f"paired client {web_client.username} with text:\n{lobby.text_info.ciphered_text}"
+    )
 
     web_client.join_game(text_info)
     # print(f"game now contains {len(lobby.clients)} clients: {lobby.clients}")
@@ -92,7 +97,7 @@ async def join_race_game(websocket: WebSocket):
     await client_racing(lobby, web_client)
 
 
-async def client_racing(lobby: WebLobby, client: WebClient):
+async def client_racing(lobby: WebLobby, web_client: WebClient):
     """Client joined a race game against other players. this function handles the socket
 
     Args:
@@ -101,11 +106,67 @@ async def client_racing(lobby: WebLobby, client: WebClient):
     # send initial information: usernames.
     # equationslayer12 donde pablo
     text_info = lobby.text_info
-    print("started a race for:", client.socket)
+    print("started a race for:", web_client.socket)
     print(lobby.status)
     while lobby.status == ONGOING or lobby.status == COUNTDOWN:
         print("clienting asking...")
-        request = await client.receive_socket_request()
-        print(client.username, "asked for", request)
-        if request == Protocol.Request.text:
-            await client.send_socket_response(text_info.ciphered_text)
+        request = await web_client.receive_socket_request()
+        print(web_client.username, "asked for", request)
+
+        response = handle_socket_request(lobby, web_client, request)
+        print("wow, response", response)
+        if response:
+            try:
+                await web_client.send_socket_response(response)
+            except TypeError:
+                return
+            if response == Protocol.FINISHED:
+                print("Oh slap! He finished!")
+            elif response == Protocol.GAME_ENDED:
+                print("ended...")
+                web_client.leave_game()
+                await web_client.close_socket()
+                return
+
+
+def handle_socket_request(lobby: WebLobby, web_client: WebClient, request: str) -> str:
+    """Get response to a websocket request, and change the player's text progress.
+
+    Args:
+        web_client (WebClient): client in freq battle game
+        request (str): the player request
+
+    Returns:
+        str: response
+    """
+
+    if request == Protocol.Request.text:
+        return web_client.text_info.ciphered_text
+
+    fields = Protocol.Decrypt.seperate_to_fields(request)
+    if not fields:
+        return Protocol.Error.empty_request
+
+    response = None
+    command, *args = fields
+    if command == Protocol.Command.change_letter:
+        if len(args) != 2:
+            return Protocol.Error.invalid_request
+
+        player = web_client.player
+        from_letter, to_letter = args
+        print(f"{player.username} | From {from_letter} to {to_letter}")
+        player.progress.guess_letter(from_letter, to_letter)
+        if player.progress.has_finished():
+            response = Protocol.Encrypt.finished()
+        else:
+            response = Protocol.Encrypt.change_letter(
+                player.progress.get_gussed_count()
+            )
+    if command == Protocol.Request.sync:
+        user_ids = lobby.get_user_ids(not_including_id=web_client.user_id)
+        scores = lobby.get_scores(not_including=web_client)
+        game_status = lobby.get_status()
+        response = Protocol.Encrypt.sync(user_ids, scores, game_status)
+
+    return response

@@ -29,15 +29,16 @@
     import { webClient } from '@/webclient/WebClient';
     import Protocol from '@/webclient/Protocol';
     import OpponentProgressBar from '@/components/progress_bar/OpponentProgressBar.vue';
-    import { COUNTDOWN, COUNTDOWN_TIME, ONGOING, QUEUE } from '@/Constants';
+    import { COUNTDOWN, ENDED, ONGOING, QUEUE, SYNC_DATA_DELAY } from '@/Constants';
     
     game.reset();
     game.setText('Waiting for other players to connect...', 0);
     
     let text = game.text;
     
+    let socketLock = false;
+    
     joinGame();
-    // waitInQueue();
 
     /**
      * connect to server and enter a race.
@@ -67,18 +68,21 @@
             const event = info[0];
 
             if (event == Protocol.Response.Event.UpdateExistingPlayers) {
-                for (let i = 1; i < info.length; i++) {
+                for (let i = 1; i < info.length; i+=2) {
                     const username = info[i];
-                    game.createOpponent(username)
+                    const userId = Number(info[i+1]);
+
+                    game.createOpponent(username, userId)
                 }
             }
             else if (event == Protocol.Response.Event.PlayerJoined) {
                 const username = info[1];
-                game.createOpponent(username);
+                const userId = Number(info[2]);
+                game.createOpponent(username, userId);
             }
             else if (event == Protocol.Response.Event.PlayerLeft) {
-                const username = info[1];
-                game.removeOpponent(username);
+                const userId = Number(info[1]);
+                game.removeOpponent(userId);
             }
             else if (event == Protocol.Response.Event.StartCountdown) {
 
@@ -93,17 +97,75 @@
                         console.log("oh boy we are starting!");
                         game.setText(text, cipheredLettersCount.value)
                         game.start();
+                        sync_data_with_server()
                     }
                 )
             }
         }
-    }
 
+        }
+
+    /**
+     * every second send a request to sync the data.
+     */
+    async function sync_data_with_server() {
+        while (webClient.socket.isConnected()) {
+            await game.sleep(SYNC_DATA_DELAY * 1000);
+            
+            const request = Protocol.Request.syncData;
+            const response = await webClient.socket.sendAndReceive(request);
+
+            const data = Protocol.Response.sync(response)
+            const game_status = data.gameStatus;
+            const user_ids = data.userIds;
+            const user_scores = data.scores;
+
+            for (let i = 0; i < user_ids.length; i++) {
+                const user_id: number = user_ids[i];
+                const user_score: number = user_scores[i];
+                
+                // set user_id's score to be user_score
+                const player = game.opponents.value[user_id].player;
+                if (player != undefined)
+                    player.progress.current = user_score;
+            }
+
+            if (game_status == ENDED) {
+                webClient.socket.disconnect();
+                game.endGame();
+            }
+
+        }
+    }
     async function getText() {
         return await webClient.socket.sendAndReceive(Protocol.Request.text);
     }
 
     async function sendChangedLetter(originLetter: string, gussedLetter: string) {
+        if (!webClient.socket.isConnected())
+            return
         
+        // if (game.status.value != ONGOING) {
+        //     console.log("here");
+        //     return
+        // }
+
+        const request = Protocol.Request.changeLetter(originLetter, gussedLetter);
+        const response = await webClient.socket.sendAndReceive(request);
+        if (!response) {
+            return
+        }
+        console.log(response);
+        if (response == Protocol.FINISHED.toString()) {
+            console.log("oh shit, youre done mate.");
+            game.finishGame();
+            return;
+        }
+        try {
+            game.textState.totalLettersGuessed.value = parseInt(response);
+        } catch {
+            return
+        }
+
     }
     </script>

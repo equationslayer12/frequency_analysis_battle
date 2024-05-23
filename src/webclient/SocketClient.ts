@@ -1,3 +1,5 @@
+import { AsyncLock } from "./AsyncLock";
+
 export default class SocketClient {
     socket: WebSocket | null;
     lock: AsyncLock
@@ -21,34 +23,49 @@ export default class SocketClient {
         return this.socket != null;
     }
 
-    async sendAndReceive(request: string): Promise<string> {        
-        return new Promise((resolve, reject) => {
-            if (!this.socket) {
-                reject();
-                return
-            }
-            this.socket.onmessage = (response) => {
-                resolve(response.data);
-            };
-            this.send(request);
-        });
+    async sendAndReceive(request: string): Promise<string> {
+        await this.lock.acquire();
+        try {
+            return new Promise((resolve, reject) => {
+                if (!this.socket) {
+                    reject();
+                    return
+                }
+                this.socket.onmessage = (response) => {
+                    resolve(response.data);
+                };
+                this.socket?.send(request);
+            });    
+        } finally {
+            this.lock.release();
+        }
     }
 
     async send(request: string) {
-        this.socket?.send(request);
+        this.lock.acquire();
+        try {
+            this.socket?.send(request);
+        } finally {
+            this.lock.release();
+        }
     }
 
     async receive(): Promise<string> {
-        return new Promise((resolve, reject) => {
-            if (!this.socket) {
-                reject();
-                return
-            }
-
-            this.socket.onmessage = (response) => {
-                resolve(response.data);
-            };
-        })
+        this.lock.acquire();
+        try {
+            return new Promise((resolve, reject) => {
+                if (!this.socket) {
+                    reject();
+                    return
+                }
+    
+                this.socket.onmessage = (response) => {
+                    resolve(response.data);
+                };
+            })    
+        } finally {
+            this.lock.release();
+        }
     }
 
     async disconnect() {

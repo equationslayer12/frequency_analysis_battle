@@ -4,10 +4,12 @@ import { cipheredLettersCount } from "@/game/Game";
 
 export class OpponentUser extends User {
     player: Player | undefined;
-
-    constructor(username: string) {
+    userId: number;
+    
+    constructor(username: string, userId: number) {
         super(username);
         this.player = undefined;
+        this.userId = userId;
     }
 
     joinGame() {

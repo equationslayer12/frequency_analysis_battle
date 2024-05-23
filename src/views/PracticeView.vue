@@ -20,10 +20,7 @@
     import PinkButton from '@/components/pinkButton.vue'
     import Protocol from '@/webclient/Protocol'
     import { webClient } from '@/webclient/WebClient';
-    import SocketClient from '@/webclient/SocketClient';
-import { ENDED } from '@/Constants';
-
-    let socketClient: SocketClient = new SocketClient();
+    import { ENDED } from '@/Constants';
     
     init();
     async function init() {
@@ -46,14 +43,14 @@ import { ENDED } from '@/Constants';
     }
     async function connectToServerSocket() {
         console.log("start connecting")
-        await socketClient.connectToServer('/practice');
+        await webClient.socket.connectToServer('/practice');
     }
     async function sendChangedLetter(originLetter: string, gussedLetter: string) {
-        if (!socketClient.isConnected())
+        if (!webClient.socket.isConnected())
             return
 
         const request = Protocol.Request.changeLetter(originLetter, gussedLetter);
-        const response = await socketClient.sendAndReceive(request);
+        const response = await webClient.socket.sendAndReceive(request);
 
         console.log(response);
         if (!response)
@@ -61,7 +58,8 @@ import { ENDED } from '@/Constants';
 
         if (response === Protocol.GAME_ENDED) {
             console.log("haha ended YESSS");
-            socketClient.disconnect();
+            webClient.socket.disconnect();
+            game.finishGame();
             game.endGame();
         }
         else {
@@ -70,16 +68,16 @@ import { ENDED } from '@/Constants';
     }
 
     async function newText() {
-        if (!socketClient.isConnected()) {
+        if (!webClient.socket.isConnected()) {
             restartPractice();
             return
         }
         console.log("receiving new text");
 
         const request = Protocol.Request.newText;
-        const response = await socketClient.sendAndReceive(request);
+        const response = await webClient.socket.sendAndReceive(request);
 
-        socketClient.disconnect();
+        webClient.socket.disconnect();
         restartPractice();
 
     }

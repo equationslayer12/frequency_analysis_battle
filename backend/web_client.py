@@ -9,10 +9,13 @@ from constants import UID_LENGTH
 
 
 class WebClient:
+    """
+    Wrapper for HTTPSession, socket, and player. also contains usernames and encryption
+    """
     def __init__(self, session: HTTPSession) -> None:
         self.is_guest = True
         self.username: str = "Guest"
-        self.user_id: int = self.generate_random_uid()  # per sesion
+        self.user_id: int = self.generate_random_uid()  # per session
         self.session: HTTPSession = session
         self.socket: WebSocket = None
         self.AESC: AESCipher = None

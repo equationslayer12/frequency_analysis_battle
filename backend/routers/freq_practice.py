@@ -44,7 +44,7 @@ async def practice_socket(websocket: WebSocket):
     client_player = web_client.player
 
     while web_client.socket:
-        request = await web_client.socket.receive_text()
+        request = await web_client.receive_socket_request()
         response = handle_socket_request(client_player, request)
         print("wow, response", response)
         if response:
@@ -82,8 +82,8 @@ def handle_socket_request(player: Player, request: str) -> str:
         print(f"{player.username} | From {from_letter} to {to_letter}")
         player.progress.guess_letter(from_letter, to_letter)
 
-        if player.progress.has_won():
-            response = Protocol.GAME_ENDED
+        if player.progress.has_finished():
+            response = Protocol.Encrypt.finished()
         else:
             response = Protocol.Encrypt.change_letter(
                 player.progress.get_gussed_count()

@@ -17,7 +17,7 @@ class Game {
     cleanText: string;
     wordsArray: string[];
     status: Ref<string>;
-    opponents: Ref<{[key: string]: OpponentUser}>;  // {username: OpponentUser}
+    opponents: Ref<{[key: number]: OpponentUser}>;  // {username: OpponentUser}
 
     constructor() {
         this.textState = new TextState();
@@ -42,14 +42,14 @@ class Game {
         this.cipheredLettersCount.value = cipheredLettersCount;
     }
 
-    createOpponent(username: string) {
-        const newOpponent = new OpponentUser(username);
+    createOpponent(username: string, userId: number) {
+        const newOpponent = new OpponentUser(username, userId);
         newOpponent.joinGame()
-        this.opponents.value[username] = newOpponent;
+        this.opponents.value[userId] = newOpponent;
     }
 
-    removeOpponent(username: string) {
-        delete this.opponents.value[username];
+    removeOpponent(userId: number) {
+        delete this.opponents.value[userId];
     }
 
     /**
@@ -100,9 +100,18 @@ class Game {
         fromLetterState.value.isGuessed = false;
     }
 
+    /**
+     * Client finished the game. game is still going (other players haven't finished)
+     */
+    finishGame() {
+        this.textState.totalLettersGuessed.value = this.cipheredLettersCount.value
+    }
+
+    /**
+     * Game has ended. Either by time limit or everybody finished.
+     */
     endGame() {
         this.status.value = ENDED;
-        this.textState.totalLettersGuessed.value = this.cipheredLettersCount.value
     }
 
     reset() {
