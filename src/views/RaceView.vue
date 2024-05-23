@@ -51,7 +51,7 @@
         
         const textLengthResponse = await webClient.socket.receive()
         const textLength = Protocol.Response.textLength(textLengthResponse)
-        game.setTextLength(textLength); // text
+        game.setTextLength(textLength);
         await webClient.socket.send(Protocol.success)
         
         await waitInQueue();
@@ -63,49 +63,73 @@
     async function waitInQueue() {
         while (game.status.value == QUEUE) {
             console.log("waiting in da queue");
+
             const queueInfoResponse = await webClient.socket.receive();
             const info = Protocol.Response.splitResponse(queueInfoResponse);
+
             console.log(`receiving in da queue: ${info}`);
-
-            const event = info[0];
-
-            if (event == Protocol.Response.Event.UpdateExistingPlayers) {
-                for (let i = 1; i < info.length; i+=2) {
-                    const username = info[i];
-                    const userId = Number(info[i+1]);
-
-                    game.createOpponent(username, userId)
-                }
-            }
-            else if (event == Protocol.Response.Event.PlayerJoined) {
-                const username = info[1];
-                const userId = Number(info[2]);
-                game.createOpponent(username, userId);
-            }
-            else if (event == Protocol.Response.Event.PlayerLeft) {
-                const userId = Number(info[1]);
-                game.removeOpponent(userId);
-            }
-            else if (event == Protocol.Response.Event.StartCountdown) {
-
-                const countdown = game.startCountdown();
-                game.setText("", cipheredLettersCount.value)
-                const text = await getText();
-                console.log("ahaha the text is:");
-                console.log(text);
-
-                countdown.then(
-                    (data) => {
-                        console.log("oh boy we are starting!");
-                        game.setText(text, cipheredLettersCount.value)
-                        game.start();
-                        sync_data_with_server()
-                    }
-                )
-            }
+            
+            await handleQueueResponse(info);
         }
+    }
 
+    async function handleQueueResponse(info: string[]) {
+        const event = info[0];
+
+        switch (event) {
+            case Protocol.Response.Event.UpdateExistingPlayers:
+                updateExistingPlayers(info);
+                break;
+            case Protocol.Response.Event.PlayerJoined:
+                playerJoined(info);
+                break;
+            case Protocol.Response.Event.PlayerLeft:
+                playerLeft(info);
+                break;
+            case Protocol.Response.Event.StartCountdown:
+                await startCountdown();
+                break;
+            default:
+                console.warn(`Unhandled event: ${event}`);
         }
+    }
+
+    function updateExistingPlayers(info: string[]) {
+        for (let i = 1; i < info.length; i+=2) {
+            const username = info[i];
+            const userId = Number(info[i+1]);
+
+            game.createOpponent(username, userId)
+        }
+    }
+
+    function playerJoined(info: string[]) {
+        const username = info[1];
+        const userId = Number(info[2]);
+        game.createOpponent(username, userId);
+    }
+
+    function playerLeft(info: string[]) {
+        const userId = Number(info[1]);
+        game.removeOpponent(userId);
+    }
+
+    async function startCountdown() {
+        const countdown = game.startCountdown();
+        game.setText("", cipheredLettersCount.value)
+        const text = await getText();
+        console.log("ahaha the text is:");
+        console.log(text);
+
+        countdown.then(
+            (data) => {
+                console.log("oh boy we are starting!");
+                game.setText(text, cipheredLettersCount.value)
+                game.start();
+                sync_data_with_server()
+            }
+        )
+    }
 
     /**
      * every second send a request to sync the data.
@@ -115,50 +139,69 @@
             await game.sleep(SYNC_DATA_DELAY * 1000);
             
             const request = Protocol.Request.syncData;
+
             const response = await webClient.socket.sendAndReceive(request);
             const data = Protocol.Response.sync(response)
-            const game_status = data.gameStatus;
-            const user_ids = data.userIds;
-            const user_scores = data.scores;
-            console.log(game_status);
-            for (let i = 0; i < user_ids.length; i++) {
-                const user_id: number = user_ids[i];
-                let user_score: number = user_scores[i];
-                if (user_score == Protocol.FINISHED)
-                    user_score = game.cipheredLettersCount.value
 
-                // set user_id's score to be user_score
-                const player = game.opponents.value[user_id].player;
-                if (player != undefined)
-                    player.progress.current = user_score;
-            }
-
-            if (game_status == ENDED) {
-                await webClient.socket.disconnect();
-                game.endGame();
-            }
+            handleSyncResponse(data);
         }
     }
+
+    async function handleSyncResponse(data: {
+        gameStatus: string;
+        userIds: number[];
+        scores: number[];
+    }) {
+        const gameStatus = data.gameStatus;
+        const userIds = data.userIds;
+        const userScores = data.scores;
+
+        console.log(gameStatus);
+        updatePlayerScores(userIds, userScores);
+
+        if (gameStatus == ENDED) {
+            await endGame();
+        }
+    }
+
+    function updatePlayerScores(userIds: number[], userScores: number[]) {
+        for (let i = 0; i < userIds.length; i++) {
+            const user_id: number = userIds[i];
+            let user_score: number = userScores[i];
+            if (user_score == Protocol.FINISHED)
+                user_score = game.cipheredLettersCount.value
+
+            // set user_id's score to be user_score
+            const player = game.opponents.value[user_id].player;
+            if (player != undefined)
+                player.progress.current = user_score;
+        }
+    }
+
     async function getText() {
         return await webClient.socket.sendAndReceive(Protocol.Request.text);
     }
 
+    async function endGame() {
+        await webClient.socket.disconnect();
+        game.endGame();
+    }
     async function sendChangedLetter(originLetter: string, gussedLetter: string) {
         if (!webClient.socket.isConnected())
             return
         
-        if (game.is_finished.value) {
+        if (game.is_finished.value)
             return
-        }
 
         const request = Protocol.Request.changeLetter(originLetter, gussedLetter);
         const response = await webClient.socket.sendAndReceive(request);
-        if (!response) {
+        if (!response)
             return
-        }
+
         console.log(response);
+        
         if (response == Protocol.FINISHED.toString()) {
-            console.log("oh shit, youre done mate.");
+            console.log("gg");
             game.finishGame();
             return;
         }
@@ -167,6 +210,5 @@
         } catch {
             return
         }
-
     }
-    </script>
+</script>
