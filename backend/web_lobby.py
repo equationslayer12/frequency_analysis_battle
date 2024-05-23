@@ -5,12 +5,13 @@ from web_client import WebClient
 from text_info import TextInfo
 from protocol import Protocol
 from typing import Dict, List
-from constants import COUNTDOWN_SECONDS, CLIENT_THRESHOLD, QUEUE, COUNTDOWN, ONGOING, ENDED
+from constants import COUNTDOWN_SECONDS, CLIENT_THRESHOLD, QUEUE, COUNTDOWN, ONGOING, ENDED, TIME_LIMIT
 
 
 class WebLobby:
     def __init__(self) -> None:
         self.clients: Dict[int, WebClient] = {}
+        self._clients_finished_count = 0
         self.text_info = TextInfo()
         self.status = QUEUE
         self._countdown_event = asyncio.Event()
@@ -42,6 +43,8 @@ class WebLobby:
 
         await asyncio.sleep(COUNTDOWN_SECONDS)
         self.status = ONGOING
+
+        self.time_limit()
 
     async def wait_for_countdown(self):
         if self.status != QUEUE:
@@ -83,6 +86,22 @@ class WebLobby:
 
         del self.clients[client.user_id]
         return True
+
+    def end_game(self):
+        self.status = ENDED
+
+    def client_fished(self):
+        self._clients_finished_count += 1
+        if self._clients_finished_count == len(self.clients):
+            self.end_game()
+
+    async def time_limit(self):
+        time.sleep(TIME_LIMIT)
+        self.end_game()
+        print("ended...")
+        for web_client in self.clients.values():
+            web_client.leave_game()
+            await web_client.close_socket()
 
     def get_status(self):
         return self.status

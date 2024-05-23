@@ -16,7 +16,8 @@ class Game {
     text: Ref<string>;
     cleanText: string;
     wordsArray: string[];
-    status: Ref<string>;
+    status: Ref<string>;  // game status
+    is_finished: Ref<boolean>;  // client status
     opponents: Ref<{[key: number]: OpponentUser}>;  // {username: OpponentUser}
 
     constructor() {
@@ -25,7 +26,8 @@ class Game {
         this.text = ref('');
         this.cleanText = '';  // text without punctuation
         this.wordsArray = [];
-        this.status = ref(QUEUE)
+        this.status = ref(QUEUE);
+        this.is_finished = ref(false);
         this.opponents = ref({});
     }
     
@@ -104,7 +106,8 @@ class Game {
      * Client finished the game. game is still going (other players haven't finished)
      */
     finishGame() {
-        this.textState.totalLettersGuessed.value = this.cipheredLettersCount.value
+        this.textState.totalLettersGuessed.value = this.cipheredLettersCount.value;
+        this.is_finished.value = true;
     }
 
     /**
@@ -116,7 +119,8 @@ class Game {
 
     reset() {
         this.status.value = QUEUE;
-        this.setText("", 0)
+        this.is_finished.value = false;
+        this.setText("", 0);
         this.textState.reset();
     }
 }

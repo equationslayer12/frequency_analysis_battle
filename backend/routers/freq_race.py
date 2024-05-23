@@ -1,7 +1,7 @@
 import asyncio
 import time
 from fastapi import APIRouter, Request, Response, WebSocket, WebSocketDisconnect
-from backend.constants import COUNTDOWN, ONGOING, QUEUE
+from backend.constants import COUNTDOWN, ENDED, ONGOING, QUEUE
 from backend.player.player import Player
 from internals.session_utils import handle_session, handle_socket_session
 from protocol import Protocol
@@ -81,15 +81,6 @@ async def join_race_game(websocket: WebSocket):
     web_client.join_game(text_info)
     # print(f"game now contains {len(lobby.clients)} clients: {lobby.clients}")
 
-    if 0:
-        try:
-            for i in range(100):
-                await web_client.send_socket_response("heartbeat")
-                await asyncio.sleep(3)
-        except Exception as e:
-            print(e)
-            print("DONE! QUITTING!!!!!!!!!!!!!!!!!!!")
-
     print(web_client.username, "is logged in:", not web_client.is_guest)
 
     print("waiting until countdown starts")
@@ -108,7 +99,7 @@ async def client_racing(lobby: WebLobby, web_client: WebClient):
     text_info = lobby.text_info
     print("started a race for:", web_client.socket)
     print(lobby.status)
-    while lobby.status == ONGOING or lobby.status == COUNTDOWN:
+    while lobby.status in (COUNTDOWN, ONGOING, ENDED):
         print("clienting asking...")
         request = await web_client.receive_socket_request()
         print(web_client.username, "asked for", request)
@@ -120,13 +111,10 @@ async def client_racing(lobby: WebLobby, web_client: WebClient):
                 await web_client.send_socket_response(response)
             except TypeError:
                 return
-            if response == Protocol.FINISHED:
+            if response == str(Protocol.FINISHED):
                 print("Oh slap! He finished!")
-            elif response == Protocol.GAME_ENDED:
-                print("ended...")
-                web_client.leave_game()
-                await web_client.close_socket()
-                return
+                web_client.player.finish_game()
+                lobby.client_fished()
 
 
 def handle_socket_request(lobby: WebLobby, web_client: WebClient, request: str) -> str:
@@ -150,10 +138,11 @@ def handle_socket_request(lobby: WebLobby, web_client: WebClient, request: str) 
     response = None
     command, *args = fields
     if command == Protocol.Command.change_letter:
-        if len(args) != 2:
+        player = web_client.player
+
+        if len(args) != 2 or player.is_finished:
             return Protocol.Error.invalid_request
 
-        player = web_client.player
         from_letter, to_letter = args
         print(f"{player.username} | From {from_letter} to {to_letter}")
         player.progress.guess_letter(from_letter, to_letter)

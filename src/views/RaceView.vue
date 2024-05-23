@@ -7,6 +7,7 @@
             <!-- here should be the countdown animation -->
         </h1>
         <h1 v-else class="my-xl text-4xl font-semibold hover:scale-125 duration-150 text-text-color">SPAN RACER</h1>
+        <PinkButton v-if="game.is_finished.value">Congratulations!</PinkButton>
         
         <span class="mx-2xl max-w-race-width md:w-race-width">
             <!-- <span class="text-text-color text-lg" v-for="(opponent, username) in opponents">{{ opponent.player }}</span> -->
@@ -30,7 +31,8 @@
     import Protocol from '@/webclient/Protocol';
     import OpponentProgressBar from '@/components/progress_bar/OpponentProgressBar.vue';
     import { COUNTDOWN, ENDED, ONGOING, QUEUE, SYNC_DATA_DELAY } from '@/Constants';
-    
+    import PinkButton from '@/components/pinkButton.vue';
+
     game.reset();
     game.setText('Waiting for other players to connect...', 0);
     
@@ -114,16 +116,17 @@
             
             const request = Protocol.Request.syncData;
             const response = await webClient.socket.sendAndReceive(request);
-
             const data = Protocol.Response.sync(response)
             const game_status = data.gameStatus;
             const user_ids = data.userIds;
             const user_scores = data.scores;
-
+            console.log(game_status);
             for (let i = 0; i < user_ids.length; i++) {
                 const user_id: number = user_ids[i];
-                const user_score: number = user_scores[i];
-                
+                let user_score: number = user_scores[i];
+                if (user_score == Protocol.FINISHED)
+                    user_score = game.cipheredLettersCount.value
+
                 // set user_id's score to be user_score
                 const player = game.opponents.value[user_id].player;
                 if (player != undefined)
@@ -131,10 +134,9 @@
             }
 
             if (game_status == ENDED) {
-                webClient.socket.disconnect();
+                await webClient.socket.disconnect();
                 game.endGame();
             }
-
         }
     }
     async function getText() {
@@ -145,10 +147,9 @@
         if (!webClient.socket.isConnected())
             return
         
-        // if (game.status.value != ONGOING) {
-        //     console.log("here");
-        //     return
-        // }
+        if (game.is_finished.value) {
+            return
+        }
 
         const request = Protocol.Request.changeLetter(originLetter, gussedLetter);
         const response = await webClient.socket.sendAndReceive(request);
