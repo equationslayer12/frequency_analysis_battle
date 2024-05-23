@@ -1,15 +1,15 @@
 import asyncio
 import time
 from fastapi import APIRouter, Request, Response, WebSocket, WebSocketDisconnect
-from backend.constants import COUNTDOWN, ENDED, ONGOING, QUEUE
+from backend.config.constants import COUNTDOWN, ENDED, ONGOING, QUEUE
 from backend.player.player import Player
-from internals.session_utils import handle_session, handle_socket_session
-from protocol import Protocol
-from web_client import WebClient
-from web_lobby import WebLobby
-from backend.text_info import TextInfo
+from sessions.session_utils import handle_session, handle_socket_session
+from backend.config.protocol import Protocol
+from backend.web.web_client import WebClient
+from backend.web.web_lobby import WebLobby
+from backend.text.text_info import TextInfo
 from typing import List
-from lobby_handler import LobbyHandler
+from backend.web.lobby_handler import LobbyHandler
 
 router = APIRouter()
 

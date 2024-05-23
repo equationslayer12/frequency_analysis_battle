@@ -1,10 +1,10 @@
 import sys
 sys.path.append("..")  # Adds higher directory to python modules path.
 
-import internals.encryption.rsa as rsa
+import sessions.encryption.rsa as rsa
 from fastapi import APIRouter, Request, Response
-from internals.session_utils import handle_session
-from protocol import Protocol
+from sessions.session_utils import handle_session
+from backend.config.protocol import Protocol
 
 public_key, private_key = rsa.get_keys()
 router = APIRouter()

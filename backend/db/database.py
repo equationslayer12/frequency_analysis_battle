@@ -2,7 +2,7 @@ import datetime
 import hmac
 import sqlite3
 import bcrypt
-from protocol import Protocol
+from backend.config.protocol import Protocol
 
 
 def _hash_password(password):

@@ -1,14 +1,15 @@
+from sessions.session_utils import handle_session, set_username_cookie
+from backend.db.database import Database
+from backend.config.protocol import Protocol
+from fastapi import APIRouter, Request, Response
 import sys
 sys.path.append("..")  # Adds higher directory to python modules path.
 
-from fastapi import APIRouter, Request, Response
-from protocol import Protocol
-from database import Database
-from internals.session_utils import handle_session, set_username_cookie
 
 router = APIRouter()
 
 db = Database.get_instance("users.db")
+
 
 @router.post('/api/log-in')
 async def log_in_with_email(request: Request, response: Response):
@@ -33,7 +34,7 @@ async def log_in_with_email(request: Request, response: Response):
         print("clienting", client.username)
         client.log_in(username)
         set_username_cookie(client, response)
-        
+
     return {
         "success": log_in_success
     }

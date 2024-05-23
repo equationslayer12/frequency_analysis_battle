@@ -1,5 +1,5 @@
-from text_progress import TextProgress
-from backend.text_info import TextInfo
+from backend.text.text_progress import TextProgress
+from backend.text.text_info import TextInfo
 
 
 class Player:

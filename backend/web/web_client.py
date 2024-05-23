@@ -1,11 +1,11 @@
 import asyncio
-from backend.internals.encryption.aes import AESCipher
+from backend.sessions.encryption.aes import AESCipher
 from backend.utils.random_utils import rand_bytes
-from internals.http_session import HTTPSession
+from sessions.http_session import HTTPSession
 from fastapi import WebSocket, WebSocketDisconnect
 from backend.player.player import Player
-from backend.text_info import TextInfo
-from constants import UID_LENGTH
+from backend.text.text_info import TextInfo
+from backend.config.constants import UID_LENGTH
 
 
 class WebClient:

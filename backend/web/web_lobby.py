@@ -1,9 +1,9 @@
 import asyncio
-from web_client import WebClient
-from text_info import TextInfo
-from protocol import Protocol
+from backend.web.web_client import WebClient
+from backend.text.text_info import TextInfo
+from backend.config.protocol import Protocol
 from typing import Dict, List
-from constants import COUNTDOWN_SECONDS, CLIENT_THRESHOLD, QUEUE, COUNTDOWN, ONGOING, ENDED, TIME_LIMIT
+from backend.config.constants import COUNTDOWN_SECONDS, CLIENT_THRESHOLD, QUEUE, COUNTDOWN, ONGOING, ENDED, TIME_LIMIT
 
 
 class WebLobby:

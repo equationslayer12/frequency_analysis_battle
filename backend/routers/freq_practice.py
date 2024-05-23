@@ -1,9 +1,9 @@
 from fastapi import APIRouter, WebSocket, Request, Response
 from starlette.websockets import WebSocketDisconnect
-from protocol import Protocol
+from backend.config.protocol import Protocol
 from backend.player.player import Player
-from backend.text_info import TextInfo
-from internals.session_utils import handle_session, handle_socket_session
+from backend.text.text_info import TextInfo
+from sessions.session_utils import handle_session, handle_socket_session
 import sys
 sys.path.append("..")  # Adds higher directory to python modules path.
 

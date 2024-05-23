@@ -1,4 +1,4 @@
-from protocol import Protocol
+from backend.config.protocol import Protocol
 
 
 class TextProgress:

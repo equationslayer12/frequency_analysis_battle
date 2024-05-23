@@ -1,4 +1,4 @@
-from text_handler import TextHandler
+from backend.text.text_handler import TextHandler
 
 
 text_handler = TextHandler()

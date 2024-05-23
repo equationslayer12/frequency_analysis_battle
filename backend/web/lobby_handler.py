@@ -1,12 +1,12 @@
 from backend.utils.random_utils import rand_bytes
-from protocol import Protocol
+from backend.config.protocol import Protocol
 import asyncio
 import random
 from typing import Dict
-from backend.constants import CLIENT_THRESHOLD, LOBBYID_LENGTH, TIME_LIMIT
-from backend.text_info import TextInfo
-from backend.web_client import WebClient
-from web_lobby import WebLobby
+from backend.config.constants import CLIENT_THRESHOLD, LOBBYID_LENGTH, TIME_LIMIT
+from backend.text.text_info import TextInfo
+from backend.web.web_client import WebClient
+from backend.web.web_lobby import WebLobby
 
 
 class LobbyHandler:
