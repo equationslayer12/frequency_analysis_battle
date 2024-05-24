@@ -1,9 +1,10 @@
+import sys
+sys.path.append("..")  # Adds higher directory to python modules path.
+
 from typing import Tuple
 from fastapi import Request, Response
 from .http_session import HTTPSession
 from backend.web.web_client import WebClient
-import sys
-sys.path.append("..")  # Adds higher directory to python modules path.
 
 
 clients: dict = {}
