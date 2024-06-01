@@ -4,7 +4,6 @@ from typing import Callable
 
 app = FastAPI()
 
-
 def main() -> None:
     app.include_router(signup.router)
     app.include_router(freq_practice.router)

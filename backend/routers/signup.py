@@ -1,14 +1,16 @@
-from sessions.session_utils import handle_session, set_username_cookie
-from backend.db.database import Database
-from backend.config.protocol import Protocol
-from fastapi import APIRouter, Request, Response
 import sys
 sys.path.append("..")  # Adds higher directory to python modules path.
+
+from fastapi import APIRouter, Request, Response
+from backend.db.database import Database
+from backend.config.protocol import Protocol
+from backend.config.constants import DB_PATH
+from sessions.session_utils import handle_session, set_username_cookie
 
 
 router = APIRouter()
 
-db = Database.get_instance("users.db")
+db = Database.get_instance(DB_PATH)
 
 
 @router.post('/api/log-in')
@@ -71,5 +73,7 @@ async def sign_up(request: Request, response: Response):
         response = {
             "username": username
         }
+    else:
+        response = {}
     response["status"] = sign_up_status
     return response

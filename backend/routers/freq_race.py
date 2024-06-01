@@ -1,5 +1,3 @@
-import asyncio
-import time
 from fastapi import APIRouter, Request, Response, WebSocket, WebSocketDisconnect
 from backend.config.constants import COUNTDOWN, ENDED, ONGOING, QUEUE
 from backend.player.player import Player

@@ -21,12 +21,12 @@ export class ClientUser extends User {
 
     logIn() {
         this.updateFromSession();
-        this.isGuest = false;
+        this.isGuest.value = false;
     }
 
     logOut() {
         this.username.value = defaultUsername;
-        this.isGuest = true;
+        this.isGuest.value = true;
     }
 }
 

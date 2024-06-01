@@ -1,5 +1,3 @@
-import datetime
-import hmac
 import sqlite3
 import bcrypt
 from backend.config.protocol import Protocol
@@ -30,7 +28,9 @@ class Database:
         self.cursor.execute('''
             SELECT username FROM users WHERE email==(?) OR username==(?)
         ''', (email, username))
+
         user = self.cursor.fetchall()
+        print("user sign up already", user)
         if user:
             print(user)
             return Protocol.Error.user_already_exists

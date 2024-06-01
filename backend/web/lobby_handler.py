@@ -1,7 +1,6 @@
 from backend.utils.random_utils import rand_bytes
 from backend.config.protocol import Protocol
 import asyncio
-import random
 from typing import Dict
 from backend.config.constants import CLIENT_THRESHOLD, LOBBYID_LENGTH, TIME_LIMIT
 from backend.text.text_info import TextInfo

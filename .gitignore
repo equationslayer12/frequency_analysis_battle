@@ -3,6 +3,7 @@ node_modules
 /dist
 __pycache__
 
+/.בצפר
 *.db
 
 # local env files

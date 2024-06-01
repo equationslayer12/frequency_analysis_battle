@@ -49,17 +49,20 @@
     import {ref} from 'vue'
     import clientUser from '@/user/ClientUser'
     import { webClient } from "@/webclient/WebClient"
-
+    import { validateUsername, validatePassword, validateEmail } from "@/lib/inputValidation"
+    import { MIN_USERNAME_LENGTH, MIN_PASSWORD_LENGTH } from "@/Constants"
+    
     const emit = defineEmits(['leave'])
 
-    let username = ref('donde');
-    let email = ref('pablo_my_love@gmail.com');
-    let password = ref('1999donde@');
-    let confirmPassword = ref('1999donde@');
+    let username = ref('');
+    let email = ref('');
+    let password = ref('');
+    let confirmPassword = ref('');
     let country = ref('');
 
     let isSigningIn = ref(false);
     let loginError = ref('')
+    let signUpError = ref('');
     const backgroundId = 'sign-up--background';
     
     async function logInWithEmail(event) {
@@ -84,6 +87,9 @@
     }
 
     async function signUpWithEmail(event) {
+        if (!validateCreds(username.value, email.value, password.value, confirmPassword.value))
+            return
+
         const response = await webClient.APIRequestPost('/sign-up', {
             username: username.value,
             country: country.value,
@@ -93,11 +99,42 @@
 
         if (response.status == Protocol.success)
             emit("leave");
-        
+        else {
+            signUpError.value = response.status;
+        }
         console.log(response);
         
     }
 
+    function validateCreds(username, email, password, confirmPassword) {
+        signUpError.value = '';
+        const isUsernameValid = validateUsername(username);
+        if (!isUsernameValid) {
+            signUpError.value =
+                `Username must include only english letters and numbers, and must have at least ${MIN_USERNAME_LENGTH} characters`;
+            console.error("invalid username");
+            return false;
+        }
+        const isEmailValid = validateEmail(email);
+        if (!isEmailValid) {
+            signUpError.value = `Invalid email format`
+            console.error("invalid email");
+            return false;
+        }
+        const isPasswordValid = validatePassword(password);
+        if (!isPasswordValid) {
+            signUpError.value =
+                `Password must include only english letters, numbers and symbols, and must have at least ${MIN_PASSWORD_LENGTH} characters`;
+            console.error("invalid password");
+            return false;
+        }
+        if (password != confirmPassword) {
+            signUpError.value = "Passwords don't match"
+            console.error("passwords don't match");
+            return false;
+        }
+        return true;
+    }
     function toggleSignInScreen() {
         isSigningIn.value = !isSigningIn.value;
     }

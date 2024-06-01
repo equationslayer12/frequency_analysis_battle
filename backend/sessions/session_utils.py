@@ -29,11 +29,11 @@ def handle_session(request: Request, response: Response) -> WebClient:
     if it doesn't, create a client and a cookie and attach it to response.
 
     Args:
-        request (Request): _description_
-        response (Response): _description_
+        request (Request): Client HTTP Request
+        response (Response): Server HTTP Response
 
     Returns:
-        Client: _description_
+        WebClient: a class that represents a user web connection.
     """
     client: WebClient | None = None
 
