@@ -68,7 +68,6 @@
             </div>
         </section>
     </div>
-    stiol hello
 </template>
 
 <script setup>

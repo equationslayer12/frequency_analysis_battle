@@ -2,28 +2,32 @@
   <!-- <div id="top" @mousemove="setTopSpotlightPosition" class="relative bg-primary-color h-96 w-full flex flex-col justify-center items-center overflow-hidden rounded-b-full shadow-lg shadow-black border-solid">
     <h1 id="title" class="text-white text-8xl">SPAN RACER</h1>
   </div> -->
-  <h1 class="mb-5">SPAN RACER</h1>
-  <div class="mb-xl max-w-2xl bg-primary-color p-lg text-xl flex justify-between rounded-md shadow-md shadow-accent-color">
-    <span class="flex flex-col">
-      <span class="text-text-color text-2xl font-bold">MULTIPLAYER</span>
-      <span class="text-text-color">Race against others to see who can decipher faster!</span>
-    </span>
-    <PinkButton draggable="false" href="/race" class="ml-xl">Race</PinkButton>
-  </div>
-  <div class="mb-xl max-w-2xl bg-primary-color p-lg text-xl flex justify-between rounded-md shadow-md shadow-accent-color">
+
+<main class="w-full flex flex-col justify-center items-center">
+  <h1 id="title" class="mb-md text-white text-8xl">SPAN RACER</h1>
+  <Card class="mb-xl max-w-2xl w-full">
     <span class="flex flex-col">
       <span class="text-text-color text-2xl font-bold">PRACTICE MODE</span>
       <span class="text-text-color">Practice deciphering to become faster!</span>
     </span>
     <PinkButton draggable="false" href="/practice">Practice</PinkButton>
-  </div>
-  <button @click="test" class="bg-cyan-500 font-bold text-3xl rounded-md p-10">TEST: {{ counter }}</button>
+  </Card>
+  <Card class="mb-xl max-w-2xl w-full">
+    <span class="flex flex-col">
+      <span class="text-text-color text-2xl font-bold">MULTIPLAYER</span>
+      <span class="text-text-color">Race against others to see who can decipher faster!</span>
+    </span>
+    <PinkButton draggable="false" href="/race" class="ml-xl">Race</PinkButton>
+  </Card>
+  <!-- <button @click="test" class="bg-cyan-500 font-bold text-3xl rounded-md p-10">TEST: {{ counter }}</button> -->
+</main>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
 import axios from 'axios';
 import PinkButton from '../components/pinkButton.vue'
+import Card from '@/components/Card.vue';
 import clientUser from '../user/ClientUser'
 
 let isHovered = ref(false);

@@ -46,7 +46,8 @@ class Protocol:
         def opponents(opponents_usernames: List[str], opponents_user_ids):
             response = []
             for username, user_id in zip(opponents_usernames, opponents_user_ids):
-                response.append(Protocol.Encrypt.combine(username, str(user_id)))
+                response.append(Protocol.Encrypt.combine(
+                    username, str(user_id)))
 
             return Protocol.Encrypt.combine("UEP", *response)
 
@@ -69,12 +70,12 @@ class Protocol:
         @staticmethod
         def finished():
             return str(Protocol.FINISHED)
-        
+
         @staticmethod
         def sync(user_ids: List[str], scores: List[int], game_status: str) -> str:
             """response to player's request to get the lobby's state. a response should look like:
             game_status;id1;score;id2;score;...
-            
+
             * score may be Protocol.FINISHED
 
             Args:

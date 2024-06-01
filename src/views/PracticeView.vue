@@ -9,7 +9,7 @@
     <span v-else>
         loading...
     </span>
-    <PinkButton @click="newText()">New Text</PinkButton>
+    <PinkButton v-if="gameStatus == ENDED" @click="newText()">Practice Again</PinkButton>
 </div>
 </template>
 
@@ -56,7 +56,7 @@
         if (!response)
             return
 
-        if (response === Protocol.GAME_ENDED) {
+        if (response === Protocol.GAME_ENDED || response === Protocol.FINISHED.toString()) {
             console.log("haha ended YESSS");
             webClient.socket.disconnect();
             game.finishGame();

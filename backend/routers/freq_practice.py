@@ -52,7 +52,7 @@ async def practice_socket(websocket: WebSocket):
                 await web_client.send_socket_response(response)
             except TypeError:
                 return
-            if response == Protocol.GAME_ENDED:
+            if response in (Protocol.GAME_ENDED, str(Protocol.FINISHED)):
                 print("ended...")
                 web_client.leave_game()
                 await web_client.close_socket()

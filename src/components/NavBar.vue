@@ -1,6 +1,6 @@
 <template>
     <SignUp v-if="isSigningUp" @leave="isSigningUp = false"/>
-    <div class="w-screen h-14 bg-primary-color flex">
+    <div class="w-screen bg-primary-color flex">
         <PinkButton draggable="false" @click="isSigningUp = true">Login</PinkButton>
         <PinkButton>{{ clientUser.username.value }}</PinkButton>
     </div>
