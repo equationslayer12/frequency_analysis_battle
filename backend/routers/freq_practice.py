@@ -89,7 +89,7 @@ def handle_socket_request(player: Player, request: str) -> str:
             response = Protocol.Encrypt.finished()
         else:
             response = Protocol.Encrypt.change_letter(
-                player.progress.get_gussed_count()
+                player.progress.get_guessed_count()
             )
 
     if command == Protocol.Command.new_text:

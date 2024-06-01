@@ -157,7 +157,7 @@ class WebLobby:
             if client.player.progress.has_finished():
                 scores.append(Protocol.FINISHED)
             else:
-                scores.append(client.player.progress.get_gussed_count())
+                scores.append(client.player.progress.get_guessed_count())
         return scores
 
     def contains_user_id(self, uid: int):

@@ -43,22 +43,22 @@ async def join_race_game(websocket: WebSocket):
     text_length_response = Protocol.Encrypt.text_length(
         text_info.ciphered_letter_count)
     await web_client.send_socket_response(text_length_response)
-
+    print("this")
     ack = await web_client.receive_socket_request()
-
+    print("acking")
     opponents_usernames = lobby.get_usernames(not_including=web_client)
     opponents_user_ids = lobby.get_user_ids(
         not_including_id=web_client.user_id)
     await web_client.send_socket_response(Protocol.Encrypt.opponents(opponents_usernames, opponents_user_ids))
-
+    print("sent response socketing opponents")
     print(lobby.clients)
     if not lobby.contains_user_id(web_client.user_id):
         info = Protocol.Encrypt.Event.player_joined(
             web_client.username, web_client.user_id)
         await lobby.notify_all(info)
-
+        print("now adding the client")
         await lobby_handler.add_client(lobby, web_client)
-
+        print("added the client")
     else:
         ...  # already connected
 
@@ -73,6 +73,7 @@ async def join_race_game(websocket: WebSocket):
 
     print("waiting until countdown starts")
     await lobby.wait_for_countdown()
+    print("countodwn started!!")
     await client_racing(lobby, web_client)
 
 
@@ -138,7 +139,7 @@ def handle_socket_request(lobby: WebLobby, web_client: WebClient, request: str) 
             response = Protocol.Encrypt.finished()
         else:
             response = Protocol.Encrypt.change_letter(
-                player.progress.get_gussed_count()
+                player.progress.get_guessed_count()
             )
     if command == Protocol.Request.sync:
         user_ids = lobby.get_user_ids(not_including_id=web_client.user_id)

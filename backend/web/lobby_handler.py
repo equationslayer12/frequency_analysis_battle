@@ -21,14 +21,11 @@ class LobbyHandler:
         self.ongoing_lobbies: Dict[int, WebLobby] = {}
 
     def find_lobby_for_client(self, web_client: WebClient) -> TextInfo:
-        """
-        Search for an available lobby for a client. If none exists, create a new one.
-
+        """Search for games in queuing_games, if empty create one.
         Args:
-            web_client (WebClient): The client wanting to join a lobby.
-
+            client (Client): the client that wants to join a game.
         Returns:
-            TextInfo: The information about the lobby found or created.
+            Game: matched game for client.
         """
         if len(self.queuing_lobbies) == 0:
             new_lobby = WebLobby(self.generate_lobby_id())
@@ -37,19 +34,19 @@ class LobbyHandler:
         lobby = next(iter(self.queuing_lobbies.values()))
         return lobby
 
-    async def add_client(self, lobby: WebLobby, web_client: WebClient):
-        """
-        Add a client to the specified lobby. Start a countdown if enough clients are present.
+    async def add_client(self, lobby: WebLobby, web_client: WebLobby):
+        """Adds a client to the lobby. Might trigger countdown before game starts. 
 
         Args:
-            lobby (WebLobby): The lobby to add the client to.
-            web_client (WebClient): The client to add.
+            lobby (WebLobby): the web lobby
+            web_client (WebLobby): web client
         """
         added = await lobby.add_client(web_client)
         if not added:
             return
-
+        
         should_start_countdown = len(lobby.clients) >= CLIENT_THRESHOLD
+        print("should start:", should_start_countdown)
         if should_start_countdown:
             del self.queuing_lobbies[lobby.lobby_id]
             self.ongoing_lobbies[lobby.lobby_id] = lobby
@@ -57,27 +54,18 @@ class LobbyHandler:
             await lobby.notify_all(Protocol.Encrypt.Event.START_COUNTDOWN)
             await lobby.start_countdown()
 
-        await self.time_limit(lobby)
+        self.time_limit(lobby)
 
     async def time_limit(self, lobby: WebLobby):
-        """
-        Apply a time limit to the lobby's game session. End the game after the time limit.
-
-        Args:
-            lobby (WebLobby): The lobby to apply the time limit to.
-        """
-        await asyncio.sleep(TIME_LIMIT)
+        asyncio.sleep(TIME_LIMIT)
         lobby.end_game()
         await lobby.close()
+        print("ended...")
+        
         del self.ongoing_lobbies[lobby.lobby_id]
 
-    def generate_lobby_id(self):
-        """
-        Generate a unique lobby ID.
 
-        Returns:
-            int: A unique lobby ID.
-        """
+    def generate_lobby_id(self):
         new_lobby_id = rand_bytes(LOBBYID_LENGTH)
         while new_lobby_id in self.queuing_lobbies or new_lobby_id in self.ongoing_lobbies:
             new_lobby_id = rand_bytes(LOBBYID_LENGTH)
