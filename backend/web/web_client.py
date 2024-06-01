@@ -10,9 +10,16 @@ from backend.config.constants import UID_LENGTH
 
 class WebClient:
     """
-    Wrapper for HTTPSession, socket, and player. also contains usernames and encryption
+    Wrapper for HTTPSession, socket, player, and encryption.
     """
+
     def __init__(self, session: HTTPSession) -> None:
+        """
+        Initialize the WebClient.
+
+        Args:
+            session (HTTPSession): The HTTP session associated with the client.
+        """
         self.is_guest = True
         self.username: str = "Guest"
         self.user_id: int = self.generate_random_uid()  # per session
@@ -25,27 +32,48 @@ class WebClient:
         self.lock = asyncio.Lock()
 
     def join_game(self, text_info: TextInfo):
+        """
+        Join a game with the provided TextInfo.
+
+        Args:
+            text_info (TextInfo): Information about the game to join.
+        """
         self.text_info = text_info
 
-        # Create a user (a player in a game)
+        # Create a player to join the game
         self.create_player()
-        # Join it
+        # Join the game
         self.player.join_game(text_info)
 
     def leave_game(self):
+        """Leave the current game."""
         self.player.leave_game()
         self.player = None
         self.text_info = None
 
     def create_player(self):
-        """Create a user to join a game.
-        """
+        """Create a player."""
         self.player = Player(self.username)
 
     def set_aes_key(self, aes_key: str):
+        """
+        Set the AES key for encryption.
+
+        Args:
+            aes_key (str): The AES key.
+        """
         self.AESC: AESCipher = AESCipher(key=aes_key)
 
     def decrypt(self, encrypted_message: str):
+        """
+        Decrypt an encrypted message using AES.
+
+        Args:
+            encrypted_message (str): The encrypted message.
+
+        Returns:
+            str: The decrypted message.
+        """
         if not self.AESC:
             print("no aesc")
             return None
@@ -56,20 +84,33 @@ class WebClient:
             return None
 
     def log_in(self, username: str):
+        """
+        Log in the user with the provided username.
+
+        Args:
+            username (str): The username to log in with.
+        """
         self.is_guest = False
         self.username = username
 
     def generate_random_uid(self):
+        """
+        Generate a random user ID.
+
+        Returns:
+            int: The generated user ID.
+        """
         return rand_bytes(UID_LENGTH)
 
     async def send_socket_response(self, message: str):
-        """Send a message to the client through the client-server websocket.
+        """
+        Send a message to the client through the WebSocket.
 
         Args:
-            message (str): message data
+            message (str): The message to send.
 
         Raises:
-            TypeError: socket is closed
+            WebSocketDisconnect: If the socket is closed.
         """
         async with self.lock:
             if self.socket:
@@ -78,6 +119,15 @@ class WebClient:
                 raise WebSocketDisconnect
 
     async def receive_socket_request(self) -> str:
+        """
+        Receive a message from the client through the WebSocket.
+
+        Returns:
+            str: The received message.
+
+        Raises:
+            WebSocketDisconnect: If the socket is closed.
+        """
         async with self.lock:
             if self.socket:
                 return await self.socket.receive_text()
@@ -85,6 +135,6 @@ class WebClient:
                 raise WebSocketDisconnect
 
     async def close_socket(self):
-        """close the client-server websocket"""
+        """Close the WebSocket connection."""
         if self.socket:
             await self.socket.close()

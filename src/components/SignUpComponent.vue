@@ -42,7 +42,7 @@
     </div>
     </template>
     
-    <script setup>
+<script setup>
     import TitleComponent from "../components/TitleComponent.vue"
     import CountryDropdown from "../components/CountryDropdown.vue"
     import Protocol from '../webclient/Protocol'
@@ -52,8 +52,10 @@
     import { validateUsername, validatePassword, validateEmail } from "@/lib/inputValidation"
     import { MIN_USERNAME_LENGTH, MIN_PASSWORD_LENGTH } from "@/Constants"
     
+    // Emit definition
     const emit = defineEmits(['leave'])
 
+    // Reactive variables
     let username = ref('');
     let email = ref('');
     let password = ref('');
@@ -63,8 +65,11 @@
     let isSigningIn = ref(false);
     let loginError = ref('')
     let signUpError = ref('');
+
+    // Background element ID
     const backgroundId = 'sign-up--background';
     
+    // Log in with email function
     async function logInWithEmail(event) {
         console.log(email.value);
         console.log(password.value);
@@ -86,6 +91,7 @@
         console.log(response);
     }
 
+    // Sign up with email function
     async function signUpWithEmail(event) {
         if (!validateCreds(username.value, email.value, password.value, confirmPassword.value))
             return
@@ -106,6 +112,7 @@
         
     }
 
+    // Validate credentials function
     function validateCreds(username, email, password, confirmPassword) {
         signUpError.value = '';
         const isUsernameValid = validateUsername(username);
@@ -135,10 +142,13 @@
         }
         return true;
     }
+
+    // Function to toggle sign-in screen
     function toggleSignInScreen() {
         isSigningIn.value = !isSigningIn.value;
     }
 
+    // Function to leave signup
     function leave(event) {
         if (event.target.id !== backgroundId) {
             return
@@ -146,4 +156,4 @@
         isSigningIn.value = false;
         emit('leave');
     }
-    </script>
+</script>

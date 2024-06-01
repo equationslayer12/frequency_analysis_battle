@@ -14,10 +14,9 @@ router = APIRouter()
 lobby_handler = LobbyHandler()
 
 
-
-
 @router.websocket("/api/race/join")
 async def join_race_game_endpoint(websocket: WebSocket):
+    """WebSocket endpoint to join a game"""
     print("client joining..")
     try:
         await join_race_game(websocket)
@@ -27,6 +26,10 @@ async def join_race_game_endpoint(websocket: WebSocket):
 
 
 async def join_race_game(websocket: WebSocket):
+    """
+    Start a race game for a client.
+    :param websocket: the client web_socket
+    """
     await websocket.accept()
 
     web_client = handle_socket_session(websocket)

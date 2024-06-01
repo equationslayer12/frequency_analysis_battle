@@ -11,11 +11,32 @@ router = APIRouter()
 
 @router.get("/api/public-key")
 def get_public_key():
+    """
+    Endpoint to retrieve the server's public key.
+
+    Returns:
+        dict: A dictionary containing the public key as a string.
+    """
     return {"key": public_key.export_key()}
 
 
 @router.post("/api/handshake")
 async def handshake(request: Request, response: Response):
+    """
+    Endpoint to handle the initial handshake between client and server.
+    This endpoint expects an encrypted AES key from the client,
+    which it decrypts using the server's private key and sets for the client's session.
+
+    Args:
+        request (Request): The incoming HTTP request.
+        response (Response): The outgoing HTTP response.
+
+    Returns:
+        dict: A dictionary indicating success or failure of the handshake process.
+
+    Raises:
+        HTTPException: If the AES key decryption fails.
+    """
     info = await request.json()
     encrypted_aes_key = info.get("encrypted_aes_key")
     if not encrypted_aes_key:

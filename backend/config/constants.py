@@ -1,3 +1,6 @@
+"""Constant variables
+"""
+
 UID_LENGTH = 4  # user id length in bytes
 LOBBYID_LENGTH = 2  # lobby id length in bytes
 COUNTDOWN_SECONDS = 3

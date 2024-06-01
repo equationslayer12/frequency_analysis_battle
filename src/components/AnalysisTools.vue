@@ -77,20 +77,26 @@ import nGramAnalysis from '../tools/nGramAnalysis'
 import { game } from '@/game/Game'
 import { ref } from 'vue'
 
+// Constants for different tools
 const LETTERS_TOOL = 0;
 const WORDS_TOOL = 1;
 const NGRAMS_TOOL = 2;
 
+// Descriptions for each tool
 const toolDescriptions = {
     "Letters": "Letter frequency",
     "Words": "Word frequency",    
     "N-Grams": "A sequence of n adjacent symbols"
 };
+
+// Reference to tool names
 const toolNames = ref(Object.keys(toolDescriptions));
+
+// Reference to the currently selected tool
 var selectedTool = ref(toolNames.value[LETTERS_TOOL]);
 
 // Letters utility
-var lettersCount = ref({})
+var lettersCount = ref({});
 for (let i = 0; i < alphabet.length; i++) {
     const letter = alphabet[i];
     lettersCount.value[letter] = 0;
@@ -100,22 +106,25 @@ countLetters(game.cleanText);
 // Words utility
 let currentWordPage = ref(0);
 const wordsPerPage = 6;
+let wordsCount = ref({});
 
-let wordsCount = ref({})
-
+// Count word occurrences
 for (let i = 0; i < game.wordsArray.length; i++) {
     const word = game.wordsArray[i];
     if (wordsCount.value[word])
-        wordsCount.value[word] ++;
+        wordsCount.value[word]++;
     else
         wordsCount.value[word] = 1;
 }
 
+// Sort words by frequency
 const mostFrequentWords = Object.keys(wordsCount.value);
 mostFrequentWords.sort((a, b) => wordsCount.value[b] - wordsCount.value[a]);
 
+// Calculate max page for word display
 const maxWordPage = Math.ceil(mostFrequentWords.length / wordsPerPage);
 
+// Function to update word page
 function updateWordsPage(count) {
     currentWordPage.value += count;
     if (currentWordPage.value < 0) {
@@ -130,6 +139,7 @@ function updateWordsPage(count) {
 // Ngrams utility
 const ngramAnalysis = new nGramAnalysis(3);
 
+// Function to count letters in text
 function countLetters(text) {
     for (let i = 0; i < text.length; i++) {
         const letter = text[i];
@@ -138,13 +148,13 @@ function countLetters(text) {
     }
 }
 
+// Function to check if a character is a letter
 function isLetter(letter) {
     return /^[A-Z]$/.test(letter);
 }
 
-
+// Find maximum letter count for page
 var maxLetterCount = 0;
-
 for (let i = 0; i < game.cleanText.length; i++) {
     const letter = game.cleanText[i];
     if(isLetter(letter)) {
@@ -152,21 +162,20 @@ for (let i = 0; i < game.cleanText.length; i++) {
     }
 }
 
+// Find maximum word count for page
 var maxWordCountForPage = findMaxWordCountForPage();
 function findMaxWordCountForPage() {
-    
     var maxWordCount = 0;
-    for (let i = currentWordPage.value*wordsPerPage; i < currentWordPage.value*wordsPerPage + wordsPerPage; i++) {
+    for (let i = currentWordPage.value * wordsPerPage; i < currentWordPage.value * wordsPerPage + wordsPerPage; i++) {
         const word = mostFrequentWords[i];
         maxWordCount = Math.max(wordsCount.value[word], maxWordCount);
     }
     return maxWordCount;
 }
-
 </script>
 
 <style scoped>
 .selected {
-    @apply font-bold bg-secondary-color
+    @apply font-bold bg-secondary-color;
 }
-</style> 
+</style>

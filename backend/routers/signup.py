@@ -7,14 +7,22 @@ from backend.config.protocol import Protocol
 from backend.config.constants import DB_PATH
 from sessions.session_utils import handle_session, set_username_cookie
 
-
 router = APIRouter()
-
 db = Database.get_instance(DB_PATH)
-
 
 @router.post('/api/log-in')
 async def log_in_with_email(request: Request, response: Response):
+    """
+    Endpoint to handle user login with email and password.
+    The email and password are expected to be encrypted and will be decrypted server-side.
+
+    Args:
+        request (Request): The incoming HTTP request containing JSON with 'email' and 'password'.
+        response (Response): The outgoing HTTP response.
+
+    Returns:
+        dict: A dictionary indicating the success or failure of the login process.
+    """
     info = await request.json()
 
     enc_email = info.get('email')
@@ -44,6 +52,18 @@ async def log_in_with_email(request: Request, response: Response):
 
 @router.post("/api/sign-up")
 async def sign_up(request: Request, response: Response):
+    """
+    Endpoint to handle user registration.
+    The username, country, email, and password are expected to be encrypted and will be decrypted server-side.
+
+    Args:
+        request (Request): The incoming HTTP request containing JSON with 'username', 'country', 'email', and 'password'.
+        response (Response): The outgoing HTTP response.
+
+    Returns:
+        dict: A dictionary indicating the success or failure of the sign-up process,
+              including the username if successful.
+    """
     client = handle_session(request, response)
 
     info = await request.json()

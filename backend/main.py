@@ -13,6 +13,7 @@ def main() -> None:
 
 @app.middleware("http")
 async def middleware(request: Request, call_next: Callable):
+    """Middleware function to intercept incoming requests."""
     response = await call_next(request)
     return response
 

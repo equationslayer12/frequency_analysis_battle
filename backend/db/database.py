@@ -12,6 +12,10 @@ GARBAGE_PASSWORD = _hash_password("garbage").encode()
 
 
 class Database:
+    """
+    Handle database operations. uses SQLite3.
+    Singleton.
+    """
     __instance = None
 
     def __init__(self, file_location) -> None:
@@ -20,10 +24,22 @@ class Database:
         self.create_users_table()
 
     def close(self):
+        """
+        close connection to the db.
+        :return:
+        """
         self.cursor.close()
         self.conn.close()
 
     def sign_up(self, username: str, country: str, email: str, password: str):
+        """
+        User wants to sign up
+        :param username: username
+        :param country: country
+        :param email: email
+        :param password: password
+        :return: None
+        """
         # Check if username or email is already in the database
         self.cursor.execute('''
             SELECT username FROM users WHERE email==(?) OR username==(?)
@@ -40,6 +56,7 @@ class Database:
         return Protocol.success
 
     def _register_user(self, username: str, country: str, email: str, password: str):
+        """add user to a database (without sanitazation and validation)"""
         print(password)
         hashed_password = _hash_password(password)
         print(hashed_password)
@@ -50,6 +67,12 @@ class Database:
         self.conn.commit()
 
     def log_in(self, email: str, password: str):
+        """
+        User wants to log in
+        :param email: email
+        :param password: password
+        :return: None
+        """
         flag = True  # prevent timing based attack
         print(password)
         self.cursor.execute('''
@@ -69,7 +92,11 @@ class Database:
         )
         return Protocol.success if flag else flag
 
-    def create_users_table(self):
+    def create_users_table(self) -> None:
+        """
+        Create users table in the database.
+        :return: None
+        """
         self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY,
@@ -107,6 +134,10 @@ class Database:
 
     @classmethod
     def get_instance(cls, file_location):
+        """
+        Singleton. Get the instance of the db.
+        :param file_location: file location of the db
+        """
         if cls.__instance is not None:
             return cls.__instance
         cls.__instance = cls(file_location)

@@ -2,6 +2,9 @@ from typing import List
 
 
 class Protocol:
+    """
+    server-client protocol
+    """
     success = "success"
     DELETE_CHAR = "del"
     FINISHED: int = -1
@@ -10,7 +13,13 @@ class Protocol:
     SPLIT = ";"
 
     class Encrypt:
+        """
+        messages to encrypt to the client
+        """
         class Event:
+            """
+            events in game
+            """
             START_COUNTDOWN = "SC"
             UPDATE_SCORE = "US"
 
@@ -40,6 +49,11 @@ class Protocol:
 
         @staticmethod
         def combine(*args):
+            """
+            combine strings into one string with Protocol.SPLIT as a seperator
+            :param args
+            :return: str
+            """
             return Protocol.SPLIT.join(args)
 
         @staticmethod

@@ -1,33 +1,46 @@
-import Protocol from "@/webclient/Protocol";
-import SessionHandle from "@/webclient/Sessions/SessionHandle";
-import User from "./User";
-import { defaultUsername } from "@/Constants";
+import Protocol from '@/webclient/Protocol';
+import SessionHandle from '@/webclient/Sessions/SessionHandle';
+import User from './User';
+import { defaultUsername } from '@/Constants';
 
+/**
+ * Represents a client user.
+ */
 export class ClientUser extends User {
-    constructor(username: string) {
-        super(username);
-    }
+     /**
+      * Constructs a ClientUser instance.
+      * @param username The username of the client user.
+      */
+     constructor(username: string) {
+          super(username);
+     }
 
-    /**
-     * Updates username from the username cookie. it is changeable by the user,
-     * but it should'nt be a big deal. unless?
-     */
-    updateFromSession() {
-        let username = SessionHandle.getCookie("username");
-        if (!username)
-            return;
-        this.username.value = Protocol.Sessions.decryptUsername(username);
-    }
+     /**
+      * Updates the username from the username cookie.
+      * It is changeable by the user, but it should not be a big deal. Unless?
+      */
+     updateFromSession(): void {
+          let username = SessionHandle.getCookie('username');
+          if (!username) return;
+          this.username.value = Protocol.Sessions.decryptUsername(username);
+     }
 
-    logIn() {
-        this.updateFromSession();
-        this.isGuest.value = false;
-    }
+     /**
+      * Logs the client user in.
+      */
+     logIn(): void {
+          this.updateFromSession();
+          this.isGuest.value = false;
+     }
 
-    logOut() {
-        this.username.value = defaultUsername;
-        this.isGuest.value = true;
-    }
+     /**
+      * Logs the client user out.
+      */
+     logOut(): void {
+          this.username.value = defaultUsername;
+          this.isGuest.value = true;
+     }
 }
 
+// Export a singleton instance of ClientUser with the default username
 export default new ClientUser(defaultUsername);

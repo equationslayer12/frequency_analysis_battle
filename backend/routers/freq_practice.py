@@ -13,6 +13,7 @@ router = APIRouter()
 
 @router.get("/api/practice")
 def practice(request: Request, response: Response):
+    """user wants to practice deciphering texts."""
     web_client = handle_session(request, response)
     if not web_client.player:
         game = TextInfo()
@@ -26,6 +27,7 @@ def practice(request: Request, response: Response):
 
 @router.websocket("/api/practice")
 async def receive_practice_socket(websocket: WebSocket):
+    """Endpoint to receive user socket"""
     try:
         await practice_socket(websocket)
     except WebSocketDisconnect:
@@ -34,6 +36,7 @@ async def receive_practice_socket(websocket: WebSocket):
 
 
 async def practice_socket(websocket: WebSocket):
+    """Handle the user socket during practice."""
     await websocket.accept()
 
     web_client = handle_socket_session(websocket)

@@ -6,11 +6,19 @@ from fastapi import Request, Response
 from .http_session import HTTPSession
 from backend.web.web_client import WebClient
 
-
 clients: dict = {}
 
-
 def handle_socket_session(websocket) -> WebClient:
+    """
+    Handle WebSocket session by extracting the client associated with the session.
+
+    Args:
+        websocket: The WebSocket connection instance.
+
+    Returns:
+        WebClient: The WebClient instance associated with the WebSocket connection.
+        None: If the session cookie is invalid or client is not found.
+    """
     client: WebClient | None = None
     session_cookie = websocket.cookies.get('session')
     if session_cookie is None:
@@ -20,20 +28,20 @@ def handle_socket_session(websocket) -> WebClient:
         return None
     client = clients.get(session.key)
 
-    client.socket = websocket
+    if client:
+        client.socket = websocket
     return client
 
-
 def handle_session(request: Request, response: Response) -> WebClient:
-    """If a request contains cookies, extract the client from it.
-    if it doesn't, create a client and a cookie and attach it to response.
+    """
+    Handle HTTP session by extracting the client from cookies or creating a new client if cookies do not exist.
 
     Args:
-        request (Request): Client HTTP Request
-        response (Response): Server HTTP Response
+        request (Request): Client HTTP Request.
+        response (Response): Server HTTP Response.
 
     Returns:
-        WebClient: a class that represents a user web connection.
+        WebClient: A class that represents a user web connection.
     """
     client: WebClient | None = None
 
@@ -64,8 +72,14 @@ def handle_session(request: Request, response: Response) -> WebClient:
         print(f"created {client.username}, with key={client.session.key}")
     return client
 
-
 def set_username_cookie(client: WebClient, response: Response):
+    """
+    Set the username cookie in the response.
+
+    Args:
+        client (WebClient): The WebClient instance.
+        response (Response): The server HTTP Response.
+    """
     if client is None:
         return
     session = client.session
@@ -74,8 +88,17 @@ def set_username_cookie(client: WebClient, response: Response):
     client.session.set_username(client.username)
     response.set_cookie(key="username", value=session.encrypt_username())
 
-
 def attempt_session_login(session_cookie: str) -> WebClient:
+    """
+    Attempt to log in a client using the session cookie.
+
+    Args:
+        session_cookie (str): The session cookie string.
+
+    Returns:
+        WebClient: The WebClient instance if login is successful.
+        None: If the session is invalid or client is not found.
+    """
     session = HTTPSession.decrypt_session(session_cookie)
     client = clients.get(session.key)
 
@@ -84,8 +107,14 @@ def attempt_session_login(session_cookie: str) -> WebClient:
 
     return client
 
+def apply_easter_eggs(request: Request, response: Response):
+    """
+    Apply easter egg cookies based on the request's existing cookies.
 
-def apply_easter_eggs(request, response):
+    Args:
+        request (Request): The client HTTP Request.
+        response (Response): The server HTTP Response.
+    """
     if request.cookies.get('easterEgg') is not None:
         response.set_cookie(key='easterEgg', value="Beer Sheva <3")
     if request.cookies.get('admin') is not None:

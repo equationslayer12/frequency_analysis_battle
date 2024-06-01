@@ -12,32 +12,60 @@ temp_text = "IT IS A PERIOD OF CIVIL WAR. REBEL SPACESHIPS, STRIKING FROM A HIDD
 # temp_text = """Out too the been like hard off. Improve enquire welcome own beloved matters her. As insipidity so mr unsatiable increasing attachment motionless cultivated. Addition mr husbands unpacked occasion he oh. Is unsatiable if projecting boisterous insensible. It recommend be resolving pretended middleton. Is he staying arrival address earnest. To preference considered it themselves inquietude collecting estimating. View park for why gay knew face. Next than near to four so hand. Times so do he downs me would. Witty abode party her found quiet law. They door four bed fail now have.""".upper()
 temp_text = temp_text.upper()
 
-
 def get_texts():
+    """
+    Load texts from a JSON file.
+
+    Returns:
+        list: A list of texts.
+    """
     with open(TEXTS_PATH) as file:
         data = json.load(file)
         return data['texts']
 
 @dataclass
 class CipherObject:
-    """ciphered text.
-    text: chipered text
-    dictionary: a decipher dictionary. {ciphered_letter: original_letter}
+    """
+    A class to represent a ciphered text and its decipher dictionary.
+
+    Attributes:
+        text (str): The ciphered text.
+        decipher_dictionary (dict): A dictionary to map ciphered letters back to original letters.
     """
     text: str
     decipher_dictionary: dict
 
-
 class TextHandler:
+    """
+    A class to handle text operations including getting random text and ciphering text.
+    """
     def __init__(self) -> None:
+        """
+        Initialize the TextHandler with texts loaded from the database.
+        """
         self.texts = get_texts()
 
-    def get_random_ciphered_text(self) -> str:
+    def get_random_ciphered_text(self) -> CipherObject:
+        """
+        Get a random text and cipher it.
+
+        Returns:
+            CipherObject: The ciphered text and its decipher dictionary.
+        """
         return self.cipher_text(
             text=self.get_random_text()
         )
 
     def cipher_text(self, text: str) -> CipherObject:
+        """
+        Cipher the given text by substituting each letter with a randomly shuffled letter.
+
+        Args:
+            text (str): The text to be ciphered.
+
+        Returns:
+            CipherObject: The ciphered text and its decipher dictionary.
+        """
         shuffled_letters = list(string.ascii_uppercase)
         random.shuffle(shuffled_letters)
 
@@ -46,14 +74,12 @@ class TextHandler:
 
         ciphered_text = ""
         i = 0
-        for letter in text:  # cipher every letter
+        for letter in text:
             if not is_letter(letter):
                 ciphered_text += letter
                 continue
-                
 
             if letter not in cipher_dictionary:
-                # if letter hasn't been ciphered yet
                 random_letter = shuffled_letters[i]
                 i += 1
                 cipher_dictionary[letter] = random_letter
@@ -65,9 +91,10 @@ class TextHandler:
         return CipherObject(ciphered_text, decipher_dictionary)
 
     def get_random_text(self) -> str:
-        """Choose a random text from the db.
+        """
+        Choose a random text from the database.
 
         Returns:
-            str: text
+            str: A randomly chosen text.
         """
         return random.choice(self.texts)

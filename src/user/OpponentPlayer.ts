@@ -1,12 +1,27 @@
-import { GameProgess } from "@/game/GameProgress";
-import { ref, Ref } from "vue";
+import { GameProgress } from '@/game/GameProgress';
+import { ref, Ref } from 'vue';
 
+/**
+ * Represents a player in the game.
+ */
 export class Player {
-    username: Ref<string>;
-    progress: GameProgess;
+     /**
+      * The username of the player.
+      */
+     username: Ref<string>;
 
-    constructor(username: string, textLength: number) {
-        this.username = ref(username);
-        this.progress = new GameProgess(textLength);
-    }
+     /**
+      * The game progress of the player.
+      */
+     progress: GameProgress;
+
+     /**
+      * Constructs a Player instance.
+      * @param username The username of the player.
+      * @param textLength The length of the text for the game progress.
+      */
+     constructor(username: string, textLength: number) {
+          this.username = ref(username);
+          this.progress = new GameProgress(textLength);
+     }
 }
