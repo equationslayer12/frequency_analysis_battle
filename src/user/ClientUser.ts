@@ -23,6 +23,8 @@ export class ClientUser extends User {
           let username = SessionHandle.getCookie('username');
           if (!username) return;
           this.username.value = Protocol.Sessions.decryptUsername(username);
+          if (this.username.value != defaultUsername)
+               this.isGuest.value = false;
      }
 
      /**
